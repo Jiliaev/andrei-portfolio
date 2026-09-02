@@ -3,71 +3,123 @@ import { useNavigate } from "react-router-dom";
 
 const works = [
   {
-    title: "NOCTURNE",
-    description: "Exploring contrast, texture and botanical ornamentation.",
-    image: "/nocturne.jpg",
-  },
-  {
-    title: "EQUUS CROWN — CONCEPT EXPLORATION",
+    title: "CASCADE DE LUMIÈRE",
     description:
-      "Studies in equestrian symbolism, concept development and creative exploration.",
-    image: "/equus-concept.jpg",
-  },
-  {
-    title: "EQUUS CROWN",
-    description:
-      "An exploration of equestrian heritage, architectural balance and ornamental refinement.",
-    image: "/equus-crown.jpg",
-  },
-  {
-    title: "SILAGE",
-    description:
-      "Organic movement translated into sculptural form through lightness, structure and negative space.",
-    image: "/silage.jpg",
-  },
-  {
-    title: "VERDELLE",
-    description:
-      "An exploration of detail, dimension, rhythm and Art Deco elegance.",
-    image: "/verdelle.jpg",
+      "A study in movement and light, exploring cascading diamond forms through rhythm, repetition and architectural structure.",
+    image: "/CASCADE DE LUMIÈRE.jpg",
+    width: 806,
   },
   {
     title: "SERAPHINE",
-    description: "Floral architecture interpreted through high jewellery design.",
-    image: "/seraphine.jpg",
-  },
-  {
-    title: "RIFT",
-    description: "Exploring tension, asymmetry, texture and negative space.",
-    image: "/rift.jpg",
-  },
-  {
-    title: "UNDA",
-    description: "Inspired by the rhythm, movement and elevation of water.",
-    image: "/unda.jpg",
-  },
-  {
-    title: "ROSÉE",
     description:
-      "An exploration of lightness, fluidity and sculptural gemstone composition.",
-    image: "/rosee.jpg",
+      "A sculptural diamond composition developed through modular elements, exploring movement, dimensionality and the relationship between form and setting.",
+    image: "/Seraphine.jpg",
+    width: 694,
+  },
+  {
+    title: "BRIDAL COUTURE",
+    description:
+      "An exploration of bridal jewellery through multiple perspectives, balancing classical proportions with sculptural settings and refined architectural detail.",
+    image: "/Bridal Couture.jpg",
+    width: 704,
+  },
+  {
+    title: "FLEUR DE LUMIÈRE",
+    description:
+      "A high jewellery necklace conceived around a dramatic pear-shaped diamond, unfolding through a composition of luminous floral forms.",
+    image: "/Fleur de Lumière.jpg",
+    width: 653,
+  },
+  {
+    title: "ARABELLE",
+    description:
+      "An ornamental high jewellery study exploring symmetry, articulated movement and intricate diamond-set architectural forms.",
+    image: "/Arabelle.jpg",
+    width: 634,
+  },
+  {
+    title: "ÉQUILIBRE",
+    description:
+      "A study in balance and proportion, combining geometric diamond forms with delicate linear structures and graduated movement.",
+    image: "/ÉQUILIBRE.jpg",
+    width: 598,
+  },
+  {
+    title: "ÉLODIE",
+    description:
+      "A refined vertical composition exploring geometry, articulation and the graceful progression of diamond-set elements.",
+    image: "/Élodie.jpg",
+    width: 560,
+  },
+  {
+    title: "LYRIA",
+    description:
+      "An exploration of pearls and diamonds through flowing openwork forms, balancing softness, rhythm and sculptural elegance.",
+    image: "/Lyria(1).jpg",
+    width: 704,
   },
   {
     title: "LUNA PEARL",
     description:
-      "Exploring sculptural form, flowing symmetry, and luminous pearl composition.",
-    image: "/luna-pearl.jpg",
+      "A sculptural pearl ring study exploring volume, symmetry and fluid diamond-set architecture from multiple perspectives.",
+    image: "/Luna Pearl Painted.jpg",
+    width: 576,
+  },
+  {
+    title: "ÉTERNELLE CASCADE",
+    description:
+      "A study of elongated diamond earrings conceived through cascading geometry, articulated lines and suspended points of light.",
+    image: "/Éternelle Cascade.jpg",
+    width: 544,
   },
   {
     title: "FLORENTINE",
     description:
-      "Concept study exploring classical pear-shaped proportions, intricate gallery architecture, and pavé-set detailing.",
+      "A technical ring study exploring an ornate pear-shaped setting through multiple views, structural detailing and refined proportions.",
     image: "/florentine.jpg",
+    width: 576,
   },
   {
-    title: "BRIDAL",
-    description: "Contemporary interpretations of timeless bridal design.",
-    image: "/bridal.jpg",
+    title: "EQUUS CROWN — CONCEPT EXPLORATION",
+    description:
+      "Early studies in equestrian symbolism, proportion and ornamental structure, documenting the evolution of an architectural ring concept.",
+    image: "/equus-concept.jpg",
+    width: 672,
+  },
+  {
+    title: "EQUUS CROWN — DESIGN DEVELOPMENT",
+    description:
+      "The developed Equus Crown concept, translating early sketches into a richly detailed composition of sculptural horses, enamel and gemstones.",
+    image: "/equus-crown.jpg",
+    width: 672,
+  },
+  {
+    title: "NOCTURNE",
+    description:
+      "A sculptural bracelet concept exploring botanical ornamentation, dramatic contrast and the interplay between pavé surfaces and dimensional floral forms.",
+    image: "/nocturnebracelet-topand3.4.jpg",
+    width: 736,
+  },
+  {
+    title: "SILLAGE",
+    description:
+      "A gestural jewellery study exploring how diamonds and fluid lines travel across the hand, wrist and body.",
+    image: "/Sillage(2).jpg",
+    width: 544,
+  },
+  {
+    title: "VERDELLE",
+    description:
+      "An architectural emerald and diamond necklace exploring geometric symmetry, articulated construction and the visual rhythm of contrasting gemstones.",
+    image: "/verdelle.jpg",
+    width: 691,
+  },
+  {
+    title: "ÉCLAT",
+    description:
+      "A diamond necklace study built around a dramatic pear-shaped centre stone, balancing brilliance with an organic, botanical composition.",
+    image: "/Eclat.jpg",
+    width: 608,
   },
 ];
 
@@ -84,6 +136,7 @@ const bottomNavItems = [
 
 export default function SketchesDesign() {
   const navigate = useNavigate();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -92,30 +145,44 @@ export default function SketchesDesign() {
     switch (item) {
       case "About":
         return "/about";
+
       case "Sketches & Design":
         return "/sketches-design";
+
       case "Process":
         return "/process";
+
       case "Jewellery Photo Portfolio":
       case "Photo Portfolio":
         return "/jewellery-photo-portfolio";
+
       case "Photography":
         return "/photography";
+
       case "Awards":
         return "/awards";
+
       case "Creative Consulting":
         return "/creative-consulting";
+
       case "Contact":
         return "/contact";
+
       default:
         return "/";
     }
   };
 
   useEffect(() => {
-    const handleScroll = () => setShowBackToTop(window.scrollY > 600);
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 600);
+    };
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
@@ -123,7 +190,10 @@ export default function SketchesDesign() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
 
-        body { margin: 0; background: #ffffff; }
+        body {
+          margin: 0;
+          background: #ffffff;
+        }
 
         .sketchPage {
           min-height: 100vh;
@@ -159,7 +229,9 @@ export default function SketchesDesign() {
           -webkit-tap-highlight-color: transparent;
         }
 
-        .homeLink:hover { opacity: 0.92; }
+        .homeLink:hover {
+          opacity: 0.92;
+        }
 
         .logo {
           width: 90px;
@@ -212,7 +284,9 @@ export default function SketchesDesign() {
         .desktopNav span {
           cursor: pointer;
           position: relative;
-          transition: color 0.45s ease, transform 0.45s ease;
+          transition:
+            color 0.45s ease,
+            transform 0.45s ease;
         }
 
         .desktopNav span:hover,
@@ -230,7 +304,9 @@ export default function SketchesDesign() {
           height: 1.1px;
           background: currentColor;
           opacity: 0;
-          transition: width 0.45s ease, opacity 0.35s ease;
+          transition:
+            width 0.45s ease,
+            opacity 0.35s ease;
         }
 
         .desktopNav span:hover::after {
@@ -286,13 +362,14 @@ export default function SketchesDesign() {
         }
 
         .work {
-          width: min(620px, 54vw);
+          width: 100%;
           margin: 0 auto;
           text-align: center;
         }
 
         .workTitle {
-          margin: 0 0 18px;
+          margin: 0 auto 18px;
+          max-width: 620px;
           font-family: "Cormorant Garamond", serif;
           font-size: clamp(22px, 1.6vw, 32px);
           letter-spacing: 0.12em;
@@ -323,7 +400,9 @@ export default function SketchesDesign() {
           -webkit-user-drag: none;
         }
 
-        .workImage:hover { transform: scale(1.015); }
+        .workImage:hover {
+          transform: scale(1.015);
+        }
 
         .sectionDivider {
           display: flex;
@@ -372,7 +451,9 @@ export default function SketchesDesign() {
         .bottomNavLink {
           cursor: pointer;
           white-space: nowrap;
-          transition: color 0.45s ease, transform 0.45s ease;
+          transition:
+            color 0.45s ease,
+            transform 0.45s ease;
         }
 
         .bottomNavLink:hover {
@@ -479,7 +560,9 @@ export default function SketchesDesign() {
           border-left: 1px solid rgba(201,179,140,0.18);
         }
 
-        .mobilePanel.open { transform: translateX(0); }
+        .mobilePanel.open {
+          transform: translateX(0);
+        }
 
         .closeMenu {
           background: transparent;
@@ -504,7 +587,9 @@ export default function SketchesDesign() {
           cursor: pointer;
         }
 
-        .mobileMenuItem:hover { color: #c9b38c; }
+        .mobileMenuItem:hover {
+          color: #c9b38c;
+        }
 
         .backToTop {
           position: fixed;
@@ -567,7 +652,9 @@ export default function SketchesDesign() {
             margin-bottom: 26px;
           }
 
-          .divider { display: none; }
+          .divider {
+            display: none;
+          }
 
           .name {
             font-size: 18px;
@@ -584,7 +671,9 @@ export default function SketchesDesign() {
             margin: 3px 0;
           }
 
-          .desktopNav { display: none; }
+          .desktopNav {
+            display: none;
+          }
 
           .hamburger {
             display: block;
@@ -617,7 +706,9 @@ export default function SketchesDesign() {
             line-height: 1.38;
           }
 
-          .work { width: 88vw; }
+          .work {
+            width: 88vw;
+          }
 
           .workTitle {
             font-family: "Cormorant Garamond", serif;
@@ -635,7 +726,9 @@ export default function SketchesDesign() {
             cursor: default;
           }
 
-          .workImage:hover { transform: none; }
+          .workImage:hover {
+            transform: none;
+          }
 
           .sectionDivider {
             display: flex;
@@ -650,7 +743,9 @@ export default function SketchesDesign() {
             width: 70px;
           }
 
-          .sectionNumber { font-size: 18px; }
+          .sectionNumber {
+            font-size: 18px;
+          }
 
           .backToTop {
             bottom: 24px;
@@ -669,12 +764,23 @@ export default function SketchesDesign() {
 
       <div className="container">
         <header className="header">
-          <div className="homeLink" onClick={() => navigate("/")}>
-            <img src="/ja-logo.png" alt="JA logo" className="logo" />
+          <div
+            className="homeLink"
+            onClick={() => navigate("/")}
+          >
+            <img
+              src="/ja-logo.png"
+              alt="JA logo"
+              className="logo"
+            />
+
             <div className="divider"></div>
 
             <div>
-              <h1 className="name">ANDREI JILIAEV</h1>
+              <h1 className="name">
+                ANDREI JILIAEV
+              </h1>
+
               <div className="subtitle">
                 <p>High Jewellery Designer</p>
                 <p>Creative Consultant</p>
@@ -683,15 +789,28 @@ export default function SketchesDesign() {
           </div>
 
           <nav className="desktopNav">
-            <span className="active">Sketches & Design</span>
-            <span onClick={() => navigate("/process")}>Process</span>
-            <span onClick={() => navigate("/jewellery-photo-portfolio")}>
+            <span className="active">
+              Sketches & Design
+            </span>
+
+            <span onClick={() => navigate("/process")}>
+              Process
+            </span>
+
+            <span
+              onClick={() =>
+                navigate("/jewellery-photo-portfolio")
+              }
+            >
               Jewellery Photo Portfolio
             </span>
           </nav>
 
           {!menuOpen && (
-            <button className="hamburger" onClick={() => setMenuOpen(true)}>
+            <button
+              className="hamburger"
+              onClick={() => setMenuOpen(true)}
+            >
               <span></span>
               <span></span>
               <span></span>
@@ -701,7 +820,10 @@ export default function SketchesDesign() {
         </header>
 
         <section className="intro">
-          <h1 className="introTitle">JEWELLERY DESIGN PORTFOLIO</h1>
+          <h1 className="introTitle">
+            JEWELLERY DESIGN PORTFOLIO
+          </h1>
+
           <p className="introText">
             A curated collection of original jewellery concepts, design studies
             and finished creations exploring sculptural form, gemstone
@@ -712,16 +834,29 @@ export default function SketchesDesign() {
         {works.map((work, index) => (
           <div key={work.title}>
             <section className="work">
-              <h2 className="workTitle">{work.title}</h2>
-              <p className="workDescription">{work.description}</p>
+              <h2 className="workTitle">
+                {work.title}
+              </h2>
+
+              <p className="workDescription">
+                {work.description}
+              </p>
+
               <img
                 src={work.image}
                 alt={work.title}
                 className="workImage"
+                style={{
+                  maxWidth: `${work.width}px`,
+                }}
                 draggable="false"
-                onContextMenu={(e) => e.preventDefault()}
+                onContextMenu={(e) =>
+                  e.preventDefault()
+                }
                 onClick={() => {
-                  if (window.innerWidth > 720) setSelectedImage(work);
+                  if (window.innerWidth > 720) {
+                    setSelectedImage(work);
+                  }
                 }}
               />
             </section>
@@ -736,13 +871,17 @@ export default function SketchesDesign() {
 
         <footer className="bottomNav">
           {bottomNavItems.map((item, index) => (
-            <div key={item} className="bottomNavItem">
+            <div
+              key={item}
+              className="bottomNavItem"
+            >
               <span
                 className="bottomNavLink"
                 onClick={() => navigate(getPath(item))}
               >
                 {item}
               </span>
+
               {index !== bottomNavItems.length - 1 && (
                 <div className="navDivider"></div>
               )}
@@ -750,11 +889,16 @@ export default function SketchesDesign() {
           ))}
         </footer>
 
-        <div className="copyright">© ANDREI JILIAEV 2026</div>
+        <div className="copyright">
+          © ANDREI JILIAEV 2026
+        </div>
       </div>
 
       {selectedImage && (
-        <div className="imageLightbox" onClick={() => setSelectedImage(null)}>
+        <div
+          className="imageLightbox"
+          onClick={() => setSelectedImage(null)}
+        >
           <div className="lightboxFrame">
             <button
               className="lightboxClose"
@@ -768,7 +912,9 @@ export default function SketchesDesign() {
               alt={selectedImage.title}
               className="lightboxImage"
               draggable="false"
-              onContextMenu={(e) => e.preventDefault()}
+              onContextMenu={(e) =>
+                e.preventDefault()
+              }
               onClick={() => setSelectedImage(null)}
             />
           </div>
@@ -778,19 +924,39 @@ export default function SketchesDesign() {
       {showBackToTop && (
         <button
           className="backToTop"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={() =>
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            })
+          }
         >
-          <span className="backToTopArrow">↑</span>
+          <span className="backToTopArrow">
+            ↑
+          </span>
         </button>
       )}
 
       <div
-        className={menuOpen ? "mobileOverlay open" : "mobileOverlay"}
+        className={
+          menuOpen
+            ? "mobileOverlay open"
+            : "mobileOverlay"
+        }
         onClick={() => setMenuOpen(false)}
       ></div>
 
-      <aside className={menuOpen ? "mobilePanel open" : "mobilePanel"}>
-        <button className="closeMenu" onClick={() => setMenuOpen(false)}>
+      <aside
+        className={
+          menuOpen
+            ? "mobilePanel open"
+            : "mobilePanel"
+        }
+      >
+        <button
+          className="closeMenu"
+          onClick={() => setMenuOpen(false)}
+        >
           ✕
         </button>
 

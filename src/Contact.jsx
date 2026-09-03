@@ -576,7 +576,9 @@ export default function Contact() {
           </div>
 
           <nav className="desktopNav">
-            <span onClick={() => navigate("/sketches-design")}>Sketches & Design</span>
+            <span onClick={() => navigate("/sketches-design")}>
+              Sketches & Design
+            </span>
 
             <span onClick={() => navigate("/process")}>Process</span>
 
@@ -601,7 +603,10 @@ export default function Contact() {
 
         <div className="contactContent">
           <p className="topicLabel">Contact</p>
-          <h2 className="mainTitle">Let's Create Something Exceptional</h2>
+
+          <h2 className="mainTitle">
+            Let's Create Something Exceptional
+          </h2>
 
           <p className="introText">
             For collaborations, creative consulting, jewellery design, CAD/CAM
@@ -638,32 +643,63 @@ export default function Contact() {
           </div>
 
           <h3 className="contactName">Andrei Jiliaev</h3>
-          <p className="contactRole">Jewellery Designer • Creative Consultant</p>
+
+          <p className="contactRole">
+            Jewellery Designer • Creative Consultant
+          </p>
 
           <div className="contactDetails">
-            <a href="tel:+16043418479">T +1 604.341.8479</a>
-            <a href="mailto:andrei@andreijiliaev.com">E andrei@andreijiliaev.com</a>
-            <a href="https://www.instagram.com/andreijiliaev" target="_blank" rel="noreferrer">
-              Instagram @andreijiliaev
+            <a href="tel:+16043418479">
+              T +1 604.341.8479
+            </a>
+
+            <a href="mailto:andrei@andreijiliaev.com">
+              E andrei@andreijiliaev.com
+            </a>
+
+            <a
+              href="https://www.instagram.com/andrei_jiliaev/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Instagram @andrei_jiliaev
+            </a>
+
+            <a
+              href="https://www.linkedin.com/in/andreijiliaev"
+              target="_blank"
+              rel="noreferrer"
+            >
+              LinkedIn
             </a>
           </div>
 
-          <p className="available">Available for selected projects worldwide.</p>
+          <p className="available">
+            Available for selected projects worldwide.
+          </p>
         </div>
       </section>
 
       <footer className="bottomNav">
         {bottomNavItems.map((item, index) => (
           <div key={item} className="bottomNavItem">
-            <span className="bottomNavLink" onClick={() => navigate(getPath(item))}>
+            <span
+              className="bottomNavLink"
+              onClick={() => navigate(getPath(item))}
+            >
               {item}
             </span>
-            {index !== bottomNavItems.length - 1 && <div className="navDivider"></div>}
+
+            {index !== bottomNavItems.length - 1 && (
+              <div className="navDivider"></div>
+            )}
           </div>
         ))}
       </footer>
 
-      <div className="copyright">© ANDREI JILIAEV 2026</div>
+      <div className="copyright">
+        © ANDREI JILIAEV 2026
+      </div>
 
       <div
         className={menuOpen ? "mobileOverlay open" : "mobileOverlay"}
@@ -671,7 +707,12 @@ export default function Contact() {
       ></div>
 
       <aside className={menuOpen ? "mobilePanel open" : "mobilePanel"}>
-        <button className="closeMenu" onClick={() => setMenuOpen(false)}>✕</button>
+        <button
+          className="closeMenu"
+          onClick={() => setMenuOpen(false)}
+        >
+          ✕
+        </button>
 
         {bottomNavItems.map((item) => (
           <span

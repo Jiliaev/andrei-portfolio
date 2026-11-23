@@ -182,3 +182,13 @@
     border-right-color: var(--border);
   }
 }
+
+/* =========================================================
+   GLOBAL MOBILE TAP HIGHLIGHT FIX
+   Disable the browser's blue/grey flash when tapping links,
+   menu entries, image controls or buttons on any page.
+   Keep intentional keyboard focus-visible styles intact.
+   ========================================================= */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}

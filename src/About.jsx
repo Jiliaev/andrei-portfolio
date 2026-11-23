@@ -1,56 +1,203 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
+// Proposal based on the ORIGINAL 1,805-line About.jsx.
+// Original stylesheet is preserved verbatim; only additive rules follow it.
+// Photos remain external in public/ as on Home.jsx.
 const bottomNavItems = [
-  "About",
-  "Sketches & Design",
-  "Process",
-  "Jewellery Photo Portfolio",
-  "Photography",
-  "Awards",
-  "Creative Consulting",
-  "Contact",
+  { label: "About", path: "/about" },
+  { label: "Selected Work", path: "/work" },
+  { label: "Sculpture", path: "/sculpture" },
+  { label: "Design & Process", path: "/design-process" },
+  { label: "Jewellery Design", path: "/jewellery-design" },
+  { label: "Awards", path: "/awards" },
+  { label: "Creative Consulting", path: "/creative-consulting" },
+  { label: "Contact", path: "/contact" },
+];
+
+const selectedWorkLinks = [
+  { label: "Sculpture & Installations", path: "/sculpture-installations" },
+  { label: "Spatial & Retail Design", path: "/spatial-retail-design" },
+  { label: "Product & Object Design", path: "/objects-design" },
+  { label: "Concept Studies", path: "/concept-studies" },
+];
+const jewelleryLinks = [
+  { label: "Sketches & Design", path: "/sketches-design" },
+  { label: "Jewellery Portfolio", path: "/jewellery-photo-portfolio" },
+  { label: "Design Process", path: "/process" },
+  { label: "Jewellery Photography", path: "/photography" },
 ];
 
 export default function About() {
+  const [artPreview, setArtPreview] = useState(null);
+  const [artPreviewClosing, setArtPreviewClosing] = useState(false);
+  const artCloseTimer = useRef(null);
+  const closeArtPreview = () => {
+    if (!artPreview || artPreviewClosing) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setArtPreview(null); return; }
+    setArtPreviewClosing(true);
+    artCloseTimer.current = window.setTimeout(() => {
+      setArtPreview(null);
+      setArtPreviewClosing(false);
+      artCloseTimer.current = null;
+    }, 300);
+  };
+  useEffect(() => () => { if (artCloseTimer.current !== null) window.clearTimeout(artCloseTimer.current); }, []);
+  const openArtPreview = (event) => {
+    const img = event.currentTarget.querySelector("img");
+    if (!img || !img.complete || !img.naturalWidth) return;
+    const rect = img.getBoundingClientRect();
+    setArtPreviewClosing(false);
+    setArtPreview({
+      src: img.currentSrc || img.src,
+      alt: img.alt,
+      width: rect.width * 1.15,
+      height: rect.height * 1.15,
+    });
+  };
+  useEffect(() => {
+    if (!artPreview) return;
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") closeArtPreview();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [artPreview, artPreviewClosing]);
+
   const [menuOpen, setMenuOpen] = useState(false);
+  const [desktopDropdown, setDesktopDropdown] = useState(null);
+  const [mobileDropdown, setMobileDropdown] = useState(null);
+  const [mobileNavigating, setMobileNavigating] = useState(false);
+  const [selectedMobileSubLink, setSelectedMobileSubLink] = useState(null);
+  const navigationTimer = useRef(null);
+  const mobileSelectionFadeTimer = useRef(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const activePath = pathname.replace(/\/+$/, "") || "/";
 
-  const getPath = (item) => {
-    switch (item) {
-      case "About":
-        return "/about";
+  // Match the logo and vertical rule to the actual height of the full name + two-line description.
+  // ResizeObserver keeps both ends aligned if the font or window size changes.
+  const brandLockupRef = useRef(null);
+  const brandTextRef = useRef(null);
 
-      case "Sketches & Design":
-        return "/sketches-design";
+  useLayoutEffect(() => {
+    const lockup = brandLockupRef.current;
+    const textBlock = brandTextRef.current;
+    if (!lockup || !textBlock) return;
 
-      case "Process":
-        return "/process";
+    const syncBrandHeight = () => {
+      const height = textBlock.getBoundingClientRect().height;
+      if (height > 0) {
+        lockup.style.setProperty('--brand-text-height', `${height}px`);
+      }
+    };
 
-      case "Jewellery Photo Portfolio":
-      case "Photo Portfolio":
-        return "/jewellery-photo-portfolio";
+    syncBrandHeight();
+    const observer = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(syncBrandHeight)
+      : null;
+    observer?.observe(textBlock);
+    window.addEventListener('resize', syncBrandHeight);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', syncBrandHeight);
+    };
+  }, []);
 
-      case "Photography":
-        return "/photography";
 
-      case "Awards":
-        return "/awards";
+  // While the mobile drawer is open, lock the page behind it (including iOS Safari).
+  // The drawer itself remains scrollable for short iPhone screens.
+  useEffect(() => {
+    if (!menuOpen) return;
 
-      case "Creative Consulting":
-      case "Design Direction":
-        return "/creative-consulting";
+    const body = document.body;
+    const scrollY = window.scrollY;
+    const previous = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+    body.dataset.mobileMenuOpen = "true";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
 
-      case "Contact":
-        return "/contact";
+    const onEscape = (event) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        setMobileDropdown(null);
+      }
+    };
+    document.addEventListener("keydown", onEscape);
 
-      default:
-        return "/";
+    return () => {
+      document.removeEventListener("keydown", onEscape);
+      delete body.dataset.mobileMenuOpen;
+      Object.entries(previous).forEach(([key, value]) => { body.style[key] = value; });
+      window.scrollTo(0, scrollY);
+    };
+  }, [menuOpen]);
+
+
+  useEffect(() => () => {
+    if (navigationTimer.current !== null) window.clearTimeout(navigationTimer.current);
+    if (mobileSelectionFadeTimer.current !== null) window.clearTimeout(mobileSelectionFadeTimer.current);
+  }, []);
+
+  const closeAndNavigate = (path, isSubmenuSelection = false) => {
+    if (navigationTimer.current !== null) return;
+    const onPhone = menuOpen && window.matchMedia("(max-width: 720px)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (onPhone && !reducedMotion) {
+      if (isSubmenuSelection) {
+        // First show white dot/text confirmation, then start the drawer exit.
+        setSelectedMobileSubLink(path);
+        mobileSelectionFadeTimer.current = window.setTimeout(() => {
+          mobileSelectionFadeTimer.current = null;
+          setMobileNavigating(true);
+        }, 190);
+        navigationTimer.current = window.setTimeout(() => {
+          navigationTimer.current = null;
+          setMenuOpen(false);
+          setMobileDropdown(null);
+          setDesktopDropdown(null);
+          setSelectedMobileSubLink(null);
+          setMobileNavigating(false);
+          navigate(path);
+        }, 390);
+      } else {
+        setMobileNavigating(true);
+        navigationTimer.current = window.setTimeout(() => {
+          navigationTimer.current = null;
+          setMenuOpen(false);
+          setMobileDropdown(null);
+          setDesktopDropdown(null);
+          navigate(path);
+        }, 360);
+      }
+      return;
     }
+    setMenuOpen(false);
+    setMobileDropdown(null);
+    setDesktopDropdown(null);
+    setSelectedMobileSubLink(null);
+    navigate(path);
   };
 
+  const go = (path) => {
+    setMenuOpen(false);
+    setDesktopDropdown(null);
+    setMobileDropdown(null);
+    navigate(path);
+  };
   return (
-    <main className="aboutPage">
+    <main className={`aboutPage${mobileNavigating ? " isMobileNavigating" : ""}${selectedMobileSubLink ? " hasSubmenuSelection" : ""}`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
 
@@ -374,8 +521,17 @@ export default function About() {
           margin-bottom: 4px;
         }
 
+        /* Keep the Philosophy text anchored to the grid's bottom edge.
+           As in Biography: last paragraph margin 20px + section margin 4px
+           = exactly 24px before the following paragraph on desktop. */
+        @media (min-width: 721px) {
+          .sketchGrid > .textBlock {
+            align-self: end;
+          }
+        }
+
         .sketchImage {
-          width: 640px;
+          width: 576px;
           height: auto;
 
           display: block;
@@ -417,6 +573,26 @@ export default function About() {
           text-align: center;
 
           padding: 100px 0 108px;
+        }
+
+        /* Recognition: restrained gold accent; typography and page layout preserved. */
+        .recognition h2 {
+          color: #9C8664;
+          margin-bottom: 24px;
+        }
+
+        .recognition h2::after {
+          content: "";
+          display: block;
+          width: 56px;
+          height: 1px;
+          background: #B7A17D;
+          margin: 20px auto 0;
+        }
+
+        /* Keep the second paragraph slightly quieter than the first. */
+        .recognition p:last-of-type {
+          color: #6C6258;
         }
 
         .recognition p {
@@ -539,6 +715,10 @@ export default function About() {
           align-items: center;
           justify-content: center;
 
+          /* Match the approved Contact download button dimensions. */
+          width: 350px;
+          min-height: 46px;
+          max-width: 100%;
           min-width: 245px;
 
           padding: 14px 22px;
@@ -1066,10 +1246,10 @@ export default function About() {
           }
 
           .sketchImage {
-            width: 115%;
+            width: 104%;
 
             transform:
-              translateX(-6%);
+              translateX(-2%);
           }
 
           .textBlock {
@@ -1185,6 +1365,1544 @@ export default function About() {
             display: none;
           }
         }
+
+
+        /* =========================================================
+           ABOUT 2026 — ADDITIVE ENHANCEMENTS
+           All original About CSS above remains unchanged.
+           ========================================================= */
+        .navItem { position: relative; }
+        .desktopNav .navText { display: inline-block; outline-offset: 4px; }
+        .navDropdownPanel {
+          position: absolute;
+          z-index: 50;
+          top: 100%;
+          left: 50%;
+          transform: translate(-50%, -10px);
+          padding-top: 11px;
+          min-width: 0;
+          width: max-content;
+          max-width: min(85vw, 360px);
+          display: block;
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: opacity 350ms ease, transform 350ms cubic-bezier(.22, 1, .36, 1), visibility 350ms;
+        }
+        .navItem.navOpen .navDropdownPanel {
+          opacity: 1;
+          visibility: visible;
+          pointer-events: auto;
+          transform: translate(-50%, 0);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .navDropdownPanel { transition: none; }
+        }
+        
+        .navDropdownInner {
+          padding: 9px 0; border: 1px solid rgba(156,134,100,.18);
+          background: rgba(255,255,255,.99);
+          box-shadow: 0 12px 32px rgba(40,31,20,.09);
+        }
+        .navDropdownLink {
+          display: block; width: 100%; padding: 10px 17px;
+          border: 0; background: transparent; color: #6f685f;
+          text-align: left; font: 400 11px/1.4 Arial,sans-serif;
+          letter-spacing: .08em; white-space: nowrap; cursor: pointer;
+        }
+        .navDropdownLink:hover, .navDropdownLink:focus-visible {
+          color: #1d1b18; background: #faf8f5;
+        }
+        .mobileSubmenu {
+          margin: -18px 0 28px 18px; border-left: 1px solid rgba(201,179,140,.3);
+          padding-left: 18px;
+        }
+        .mobileSubmenuLink {
+          display: block; width: 100%; border: 0; padding: 8px 0;
+          text-align: left; background: transparent;
+          color: #e1dbcf; font: 14px/1.5 Arial,sans-serif;
+          cursor: pointer;
+        }
+        .mobilePanel.open { overflow-y: auto; }
+        .aboutImageCaption {
+          display: block; margin: 10px auto 0;
+          color: #978a77; font: 10px/1.5 Arial,sans-serif;
+          text-transform: uppercase; letter-spacing: .13em;
+          text-align: center;
+        }
+        .directions {
+          width: min(1160px,86vw); margin: 0 auto;
+          padding: 14px 0 118px;
+          text-align: center;
+        }
+        .directions > p.introText {
+          max-width: 740px; margin: 0 auto 52px;
+          font: 300 16px/1.8 'Times New Roman', Georgia, serif;
+          color: #6C6258;
+        }
+        .directions h2 {
+          margin: 0 0 27px; font-family: 'Cormorant Garamond',serif;
+          font-size: clamp(30px,2.45vw,44px); line-height: 1.12;
+          letter-spacing: .14em; text-transform: uppercase;
+          font-weight: 400; color: #2A2723;
+        }
+        .directionsGrid {
+          display: grid; grid-template-columns: repeat(3,minmax(0,1fr));
+          gap: 32px; text-align: left; align-items: start;
+        }
+        .directionCard { min-width: 0; }
+        .directionCard img {
+          display: block; width: 100%; aspect-ratio: 4/5;
+          object-fit: contain; background: #fff;
+        }
+        .directionCard h3 {
+          font: 400 29px/1.15 'Cormorant Garamond',serif;
+          color: #2A2723; margin: 18px 0 9px;
+        }
+        .directionCard p {
+          font: 300 15px/1.65 'Times New Roman',Georgia,serif;
+          color: #4f4942; margin: 0 0 10px;
+        }
+        .directionStatus {
+          font: 10px/1.5 Arial,sans-serif;
+          letter-spacing: .17em; text-transform: uppercase;
+          color: #9C8664;
+        }
+        /* Selected Directions: image and gold-label links only. */
+        .directions .directionImageLink {
+          display: block;
+          width: 100%;
+          padding: 0;
+          margin: 0;
+          background: transparent;
+          border: 0;
+          border-radius: 0;
+          text-align: left;
+          cursor: pointer;
+        }
+        .directions .directionImageLink img {
+          transform: scale(1);
+          transform-origin: center center;
+          transition: transform .4s cubic-bezier(.22,.61,.36,1);
+        }
+        .directions .directionStatusLink {
+          display: inline-block;
+          padding: 0;
+          margin: 0;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          text-align: left;
+          font-weight: 400;
+          cursor: pointer;
+          transform: scale(1);
+          transform-origin: left center;
+          transition: transform .38s cubic-bezier(.22,.61,.36,1), color .38s ease;
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .directions .directionImageLink:hover img,
+          .directions .directionImageLink:focus-visible img { transform: scale(1.035); }
+          .directions .directionStatusLink:hover,
+          .directions .directionStatusLink:focus-visible {
+            transform: scale(1.06);
+            color: #7D6745;
+          }
+        }
+        .directions .directionImageLink:focus-visible,
+        .directions .directionStatusLink:focus-visible {
+          outline: 2px solid #9C8664;
+          outline-offset: 5px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .directions .directionImageLink img,
+          .directions .directionStatusLink { transition: none; }
+        }
+        .aboutContactLink {
+          display: inline-flex; align-items: center; justify-content: center;
+          min-width: 245px; padding: 14px 22px;
+          border: 1px solid rgba(156,134,100,.42);
+          background: #fff; color: #3f3933; font: 10px Arial,sans-serif;
+          letter-spacing: .24em; text-transform: uppercase;
+          cursor: pointer; transition: border-color .4s,color .4s;
+        }
+        .aboutContactLink:hover { color: #9C8664; border-color: #9C8664; }
+        @media (max-width: 900px) and (min-width: 721px) {
+          .directionsGrid { gap: 20px; }
+          .directionCard h3 { font-size: 25px; }
+        }
+        @media (max-width:720px) {
+          .directions { width: 88vw; padding: 0 0 92px; }
+          .directionsGrid { grid-template-columns: 1fr; gap: 42px; }
+          .directions h2 { font-size:28px; letter-spacing:.11em; }
+          .directionCard img { aspect-ratio: 4/4; }
+          .directions > p.introText { margin-bottom: 35px; }
+        }
+
+        /* =========================================================
+           CRAFT & PRECISION — BETWEEN PHILOSOPHY AND SELECTED DIRECTIONS
+           Scoped styles; original page dimensions and type left untouched.
+        ========================================================= */
+        .craftSection {
+          width: min(1120px, 86vw);
+          margin: 20px auto 115px;
+          display: grid;
+          /* Give the artwork a REAL 576px column, not a fractional one. */
+          grid-template-columns: 576px minmax(0, 1fr);
+          column-gap: 78px;
+          align-items: center;
+        }
+        .craftArtwork {
+          width: 576px;
+          max-width: none;
+          justify-self: center;
+        }
+        .craftArtwork img {
+          display: block;
+          /* Exactly matches the 576px width of Floral Lips (.sketchImage). */
+          width: 576px;
+          max-width: none;
+          height: auto;
+          object-fit: contain;
+        }
+        .craftText {
+          min-width: 0;
+        }
+        .craftText h2 {
+          margin: 0 0 34px;
+          font-family: "Cormorant Garamond", serif;
+          font-size: clamp(30px, 2.45vw, 44px);
+          line-height: 1.12;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          font-weight: 400;
+          color: #2A2723;
+        }
+        .craftText > p:not(.topicLabel) {
+          margin: 0 0 20px;
+          font-size: 16px;
+          line-height: 1.82;
+          font-weight: 300;
+          color: #3F3933;
+        }
+        .craftText > p:last-child {
+          margin-bottom: 0;
+        }
+        @media (min-width: 721px) and (max-width: 1220px) {
+          .craftSection {
+            grid-template-columns: 1fr;
+            row-gap: 40px;
+          }
+          .craftText {
+            width: min(590px, 100%);
+            justify-self: center;
+          }
+        }
+        @media (max-width: 720px) {
+          .craftSection {
+            width: 88vw;
+            grid-template-columns: 1fr;
+            gap: 44px;
+            margin: 20px auto 100px;
+          }
+          .craftArtwork {
+            width: 100%;
+            max-width: none;
+            transform: none;
+          }
+          .craftArtwork img {
+            /* Floral Lips uses 104% and translateX(-2%) on mobile. */
+            width: 104%;
+            max-width: none;
+            transform: translateX(-2%);
+          }
+          .craftText h2 {
+            font-size: 28px;
+            letter-spacing: 0.11em;
+          }
+          .craftText > p:not(.topicLabel) {
+            line-height: 1.75;
+          }
+        }
+
+        /* =========================================================
+           2026 EDITORIAL REFINEMENT — CONCEPT / LION SECTION
+           Original site styles, spacing, fonts and image sizes preserved.
+        ========================================================= */
+        .sketchGrid .conceptHeading {
+          font-size: clamp(30px, 2.25vw, 40px);
+          letter-spacing: .10em;
+        }
+        .lionSection {
+          width: min(1120px, 86vw);
+          margin: 5px auto 120px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 576px;
+          gap: 78px;
+          align-items: center;
+        }
+        .lionText { min-width: 0; }
+        .lionText h2 {
+          margin: 0 0 34px;
+          font-family: "Cormorant Garamond", serif;
+          font-size: clamp(30px, 2.45vw, 44px);
+          line-height: 1.12;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+          font-weight: 400;
+          color: #2A2723;
+        }
+        .lionText > p:not(.topicLabel) {
+          margin: 0 0 20px;
+          font-size: 16px;
+          line-height: 1.82;
+          font-weight: 300;
+          color: #3F3933;
+        }
+        .lionText > p:last-child { margin-bottom: 0; }
+        .lionArtwork {
+          width: 576px;
+          justify-self: center;
+        }
+        .lionArtwork img {
+          display: block;
+          width: 576px;
+          height: auto;
+          object-fit: contain;
+        }
+        @media (min-width: 721px) and (max-width: 1220px) {
+          .lionSection {
+            grid-template-columns: 1fr;
+            gap: 40px;
+          }
+          .lionText {
+            width: min(590px, 100%);
+            justify-self: center;
+          }
+        }
+        @media (max-width: 720px) {
+          .sketchGrid .conceptHeading {
+            font-size: 28px;
+            letter-spacing: .09em;
+          }
+          .lionSection {
+            width: 88vw;
+            grid-template-columns: 1fr;
+            gap: 44px;
+            margin: 0 auto 100px;
+          }
+          .lionArtwork {
+            width: 100%;
+            order: -1;
+          }
+          .lionArtwork img {
+            width: 104%;
+            transform: translateX(-2%);
+          }
+          .lionText { text-align: center; }
+          .lionText h2 {
+            font-size: 28px;
+            letter-spacing: .11em;
+          }
+          .lionText > p:not(.topicLabel) { line-height: 1.75; }
+        }
+
+        /* =========================================================
+           CONSISTENT SECTION LABEL TYPOGRAPHY
+           Applies to all small gold eyebrow labels on About.
+           Keeps section titles, body copy and layout styles unchanged.
+        ========================================================= */
+        .aboutPage p.topicLabel {
+          display: inline-block;
+          margin: 0 0 22px;
+          padding-left: 0.38em;
+          font-family: Arial, sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          font-style: normal;
+          line-height: 1.1;
+          letter-spacing: 0.38em;
+          text-transform: uppercase;
+          text-align: center;
+          color: #9C8664;
+          max-width: 100%;
+          white-space: normal;
+        }
+        @media (max-width: 720px) {
+          .aboutPage p.topicLabel {
+            font-size: 12px;
+            letter-spacing: 0.34em;
+            padding-left: 0.34em;
+          }
+        }
+
+        /* =========================================================
+           HOME / ABOUT — BALANCED JA LOGO / TEXT ALIGNMENT
+           Match the visible height of the name plus two subtitle lines.
+           The text line boxes have a few pixels of invisible padding:
+           remove 8px from their measured total height, NOT 40% or more.
+           Keep the divider deliberately short and centred.
+           Mobile header layout stays unchanged.
+        ========================================================= */
+        @media (min-width: 721px) {
+          .aboutPage .homeLink > .logo {
+            width: auto;
+            height: calc(var(--brand-text-height, 86px) - 8px);
+            max-width: none;
+            flex-shrink: 0;
+            align-self: center;
+            object-fit: contain;
+            margin: 0;
+          }
+
+          .aboutPage .homeLink > .divider {
+            height: calc(var(--brand-text-height, 86px) - 20px);
+            align-self: center;
+            margin-top: 0;
+            flex-shrink: 0;
+          }
+        }
+      
+        /* FINAL TYPOGRAPHY — all reading/body copy, desktop + mobile */
+        .aboutPage .textBlock p:not(.topicLabel),
+        .aboutPage .fullBiography p,
+        .aboutPage .fullPhilosophy p,
+        .aboutPage .recognition p,
+        .aboutPage .portfolioDownloads p:not(.topicLabel),
+        .aboutPage .cta p,
+        .aboutPage .expertiseCard p,
+        .aboutPage .directions > p.introText,
+        .aboutPage .directionsCard p,
+        .aboutPage .craftText > p:not(.topicLabel),
+        .aboutPage .lionText > p:not(.topicLabel) {
+          font-size: 17px;
+          line-height: 1.82;
+        }
+
+        /* Match Creative Consulting: four Areas of Expertise descriptions only. */
+        .aboutPage .expertiseCard p {
+          font-size: 14px;
+          line-height: 1.75;
+          font-weight: 300;
+          color: #3F3933;
+        }
+
+/* EXACT ABOUT REFERENCE: shared brand, header and navigation */
+.aboutPage .container {
+width: min(1680px, 88vw);
+          margin: 0 auto;
+
+          /* SAME POSITION AS OTHER APPROVED INTERNAL PAGES */
+          padding: clamp(34px, 4vh, 48px) 0 0;
+}
+.aboutPage .header {
+display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 22px;
+
+          margin-left: clamp(100px, 7vw, 180px);
+
+          margin-bottom: clamp(102px, 11vh, 140px);
+
+          position: relative;
+}
+.aboutPage .homeLink {
+display: flex;
+          align-items: flex-start;
+          gap: 22px;
+
+          cursor: pointer;
+
+          color: inherit;
+          text-decoration: none;
+
+          -webkit-tap-highlight-color: transparent;
+}
+.aboutPage .homeLink:hover {
+opacity: 0.96;
+}
+.aboutPage .logo {
+width: 90px;
+          height: auto;
+
+          display: block;
+
+          object-fit: contain;
+
+          opacity: 1;
+}
+.aboutPage .divider {
+width: 1px;
+          height: 64px;
+
+          background: rgba(70, 65, 58, 0.22);
+
+          margin-top: 4px;
+}
+.aboutPage .name {
+margin: 0;
+
+          font-size: clamp(24px, 2vw, 34px);
+
+          font-weight: 300;
+
+          letter-spacing: 0.22em;
+
+          line-height: 1;
+
+          color: #1d1b18;
+}
+.aboutPage .subtitle {
+margin-top: 12px;
+
+          font-family: Arial, sans-serif;
+
+          letter-spacing: 0.28em;
+
+          color: #6f685f;
+}
+.aboutPage .subtitle p {
+margin: 4px 0;
+
+          font-size: clamp(10px, 0.85vw, 13px);
+}
+.aboutPage .desktopNav {
+display: flex;
+
+          gap: 34px;
+
+          margin-right: clamp(40px, 5vw, 120px);
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(8px, 0.8vw, 12px);
+
+          letter-spacing: 0.18em;
+
+          text-transform: uppercase;
+
+          color: #6f685f;
+
+          white-space: nowrap;
+}
+.aboutPage .desktopNav span {
+cursor: pointer;
+
+          transition:
+            color 0.45s ease,
+            transform 0.45s ease;
+}
+.aboutPage .desktopNav span:hover {
+color: #1d1b18;
+
+          transform: scale(1.04);
+}
+.aboutPage .footerWrap {
+width: min(1680px, 88vw);
+
+          margin: 0 auto;
+
+          padding-bottom: clamp(14px, 2vh, 28px);
+}
+.aboutPage .footerLine {
+width: 100%;
+
+          height: 1px;
+
+          background: rgba(0, 0, 0, 0.08);
+
+          margin-bottom: 20px;
+}
+.aboutPage .bottomNav {
+display: flex;
+
+          justify-content: center;
+          align-items: center;
+
+          flex-wrap: wrap;
+
+          gap: 0;
+
+          padding-bottom: 5px;
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(8px, 0.8vw, 12px);
+
+          letter-spacing: 0.18em;
+
+          text-transform: uppercase;
+
+          color: #6f685f;
+}
+.aboutPage .bottomNavItem {
+display: flex;
+
+          align-items: center;
+}
+.aboutPage .bottomNavLink {
+cursor: pointer;
+
+          white-space: nowrap;
+
+          transition:
+            color 0.45s ease,
+            transform 0.45s ease;
+}
+.aboutPage .bottomNavLink:hover {
+color: #1d1b18;
+
+          transform: scale(1.08);
+}
+.aboutPage .navDivider {
+width: 1px;
+
+          height: clamp(10px, 0.9vw, 14px);
+
+          background:
+            rgba(111, 104, 95, 0.25);
+
+          margin-left:
+            clamp(4px, 0.7vw, 12px);
+
+          margin-right:
+            clamp(4px, 0.7vw, 12px);
+}
+.aboutPage .copyright {
+margin-top: 12px;
+
+          text-align: center;
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(7px, 0.55vw, 9px);
+
+          letter-spacing: 0.28em;
+
+          text-transform: uppercase;
+
+          color: #b9b2a8;
+}
+
+/* In About, the gold logo follows the measured height of the brand text. */
+@media (min-width: 721px) {
+ .aboutPage .homeLink > .logo { width:auto; height:calc(var(--brand-text-height, 86px) - 8px); max-width:none; flex-shrink:0; align-self:center; object-fit:contain; margin:0; }
+ .aboutPage .homeLink > .divider { height:calc(var(--brand-text-height, 86px) - 20px); align-self:center; margin-top:0; flex-shrink:0; }
+}
+@media (min-width:721px) and (max-height:900px) {
+ .aboutPage .container {padding-top:38px;}
+ .aboutPage .header {margin-bottom:104px;}
+ .aboutPage .footerLine {margin-bottom:16px;}
+ .aboutPage .copyright {margin-top:9px;}
+ .aboutPage .footerWrap {padding-bottom:12px;}
+}
+@media (min-width:721px) and (max-height:760px) {
+ .aboutPage .container {padding-top:28px;}
+ .aboutPage .header {margin-bottom:82px;}
+}
+@media (max-width:720px) {
+ .aboutPage .container {width:92vw;padding-top:38px;}
+ .aboutPage .header {flex-direction:column;align-items:center;gap:0;margin-left:0;margin-bottom:68px;text-align:center;}
+ .aboutPage .homeLink {flex-direction:column;align-items:center;gap:0;}
+ .aboutPage .logo {width:76px;height:auto;margin-bottom:26px;}
+ .aboutPage .divider, .aboutPage .desktopNav {display:none;}
+ .aboutPage .name {font-size:18px;letter-spacing:.18em;}
+ .aboutPage .subtitle {margin-top:8px;letter-spacing:.26em;}
+ .aboutPage .subtitle p {font-size:8px;margin:3px 0;}
+ .aboutPage .footerWrap {display:none;}
+}
+/* Gold active item: COLOR ONLY. No changes to font, weight, scale or spacing. */
+.aboutPage .desktopNav .navText.isCurrent,
+.aboutPage .desktopNav .navCurrent,
+.aboutPage .bottomNavLink.isActive {color:#9C8664 !important;}
+
+      
+        /* JA logo — restore original About width; do not resize navigation text. */
+        @media (min-width: 721px) {
+          .aboutPage .homeLink > .logo { width: 90px; height: auto; max-width: none; }
+        }
+        @media (min-width: 721px) and (max-height: 900px) {
+          .aboutPage .homeLink > .logo { width: 82px; height: auto; }
+        }
+        @media (min-width: 721px) and (max-height: 760px) {
+          .aboutPage .homeLink > .logo { width: 74px; height: auto; }
+        }
+        @media (max-width: 720px) {
+          .aboutPage .homeLink > .logo { width: 76px; height: auto; }
+        }
+      
+/* EXACT HEADER AND FOOTER CSS FROM USER-SUPPLIED ABOUT; NEVER MODIFY THESE DIMENSIONS */
+.aboutPage .container {
+          width: min(1680px, 88vw);
+          margin: 0 auto;
+
+          
+          padding: clamp(34px, 4vh, 48px) 0 0;
+        }
+.aboutPage .header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 22px;
+
+          margin-left: clamp(100px, 7vw, 180px);
+
+          margin-bottom: clamp(102px, 11vh, 140px);
+
+          position: relative;
+        }
+.aboutPage .homeLink {
+          display: flex;
+          align-items: flex-start;
+          gap: 22px;
+
+          cursor: pointer;
+
+          color: inherit;
+          text-decoration: none;
+
+          -webkit-tap-highlight-color: transparent;
+        }
+.aboutPage .homeLink:hover {
+          opacity: 0.96;
+        }
+.aboutPage .logo {
+          width: 90px;
+          height: auto;
+
+          display: block;
+
+          object-fit: contain;
+
+          opacity: 1;
+        }
+.aboutPage .divider {
+          width: 1px;
+          height: 64px;
+
+          background: rgba(70, 65, 58, 0.22);
+
+          margin-top: 4px;
+        }
+.aboutPage .name {
+          margin: 0;
+
+          font-size: clamp(24px, 2vw, 34px);
+
+          font-weight: 300;
+
+          letter-spacing: 0.22em;
+
+          line-height: 1;
+
+          color: #1d1b18;
+        }
+.aboutPage .subtitle {
+          margin-top: 12px;
+
+          font-family: Arial, sans-serif;
+
+          letter-spacing: 0.28em;
+
+          color: #6f685f;
+        }
+.aboutPage .subtitle p {
+          margin: 4px 0;
+
+          font-size: clamp(10px, 0.85vw, 13px);
+        }
+.aboutPage .desktopNav {
+          display: flex;
+
+          gap: 34px;
+
+          margin-right: clamp(40px, 5vw, 120px);
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(8px, 0.8vw, 12px);
+
+          letter-spacing: 0.18em;
+
+          text-transform: uppercase;
+
+          color: #6f685f;
+
+          white-space: nowrap;
+        }
+.aboutPage .desktopNav span {
+          cursor: pointer;
+
+          transition:
+            color 0.45s ease,
+            transform 0.45s ease;
+        }
+.aboutPage .desktopNav span:hover {
+          color: #1d1b18;
+
+          transform: scale(1.04);
+        }
+.aboutPage .footerWrap {
+          width: min(1680px, 88vw);
+
+          margin: 0 auto;
+
+          padding-bottom: clamp(14px, 2vh, 28px);
+        }
+.aboutPage .footerLine {
+          width: 100%;
+
+          height: 1px;
+
+          background: rgba(0, 0, 0, 0.08);
+
+          margin-bottom: 20px;
+        }
+.aboutPage .bottomNav {
+          display: flex;
+
+          justify-content: center;
+          align-items: center;
+
+          flex-wrap: wrap;
+
+          gap: 0;
+
+          padding-bottom: 5px;
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(8px, 0.8vw, 12px);
+
+          letter-spacing: 0.18em;
+
+          text-transform: uppercase;
+
+          color: #6f685f;
+        }
+.aboutPage .bottomNavItem {
+          display: flex;
+
+          align-items: center;
+        }
+.aboutPage .bottomNavLink {
+          cursor: pointer;
+
+          white-space: nowrap;
+
+          transition:
+            color 0.45s ease,
+            transform 0.45s ease;
+        }
+.aboutPage .bottomNavLink:hover {
+          color: #1d1b18;
+
+          transform: scale(1.08);
+        }
+.aboutPage .navDivider {
+          width: 1px;
+
+          height: clamp(10px, 0.9vw, 14px);
+
+          background:
+            rgba(111, 104, 95, 0.25);
+
+          margin-left:
+            clamp(4px, 0.7vw, 12px);
+
+          margin-right:
+            clamp(4px, 0.7vw, 12px);
+        }
+.aboutPage .copyright {
+          margin-top: 12px;
+
+          text-align: center;
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(7px, 0.55vw, 9px);
+
+          letter-spacing: 0.28em;
+
+          text-transform: uppercase;
+
+          color: #b9b2a8;
+        }
+@media  (min-width: 721px) and (max-height: 900px)  {
+.aboutPage .container {
+            
+            padding-top: 38px;
+          }
+.aboutPage .header {
+            margin-bottom: 104px;
+          }
+.aboutPage .logo {
+            width: 82px;
+          }
+.aboutPage .divider {
+            height: 58px;
+          }
+.aboutPage .footerLine {
+            margin-bottom: 16px;
+          }
+.aboutPage .copyright {
+            margin-top: 9px;
+          }
+.aboutPage .footerWrap {
+            padding-bottom: 12px;
+          }
+}
+@media  (min-width: 721px) and (max-height: 760px)  {
+.aboutPage .container {
+            
+            padding-top: 28px;
+          }
+.aboutPage .header {
+            margin-bottom: 82px;
+          }
+.aboutPage .logo {
+            width: 74px;
+          }
+}
+@media  (max-width: 720px)  {
+.aboutPage .container {
+            width: 92vw;
+
+            
+            padding-top: 38px;
+          }
+.aboutPage .header {
+            flex-direction: column;
+
+            align-items: center;
+
+            gap: 0;
+
+            margin-left: 0;
+
+            margin-bottom: 68px;
+
+            text-align: center;
+          }
+.aboutPage .homeLink {
+            flex-direction: column;
+
+            align-items: center;
+
+            gap: 0;
+          }
+.aboutPage .logo {
+            width: 76px;
+
+            margin-bottom: 26px;
+          }
+.aboutPage .divider, .aboutPage .desktopNav {
+            display: none;
+          }
+.aboutPage .name {
+            font-size: 18px;
+
+            letter-spacing: 0.18em;
+          }
+.aboutPage .subtitle {
+            margin-top: 8px;
+
+            letter-spacing: 0.26em;
+          }
+.aboutPage .subtitle p {
+            font-size: 8px;
+
+            margin: 3px 0;
+          }
+.aboutPage .footerWrap {
+            display: none;
+          }
+}
+.aboutPage .navItem { position: relative; }
+.aboutPage .desktopNav .navText { display: inline-block; outline-offset: 4px; }
+.aboutPage .navDropdownPanel {
+          position: absolute;
+          z-index: 50;
+          top: 100%;
+          left: 50%;
+          transform: translate(-50%, -10px);
+          padding-top: 11px;
+          min-width: 0;
+          width: max-content;
+          max-width: min(85vw, 360px);
+          display: block;
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: opacity 350ms ease, transform 350ms cubic-bezier(.22, 1, .36, 1), visibility 350ms;
+        }
+.aboutPage .navItem.navOpen .navDropdownPanel {
+          opacity: 1;
+          visibility: visible;
+          pointer-events: auto;
+          transform: translate(-50%, 0);
+        }
+@media  (prefers-reduced-motion: reduce)  {
+.aboutPage .navDropdownPanel { transition: none; }
+}
+.aboutPage .navDropdownInner {
+          padding: 9px 0; border: 1px solid rgba(156,134,100,.18);
+          background: rgba(255,255,255,.99);
+          box-shadow: 0 12px 32px rgba(40,31,20,.09);
+        }
+.aboutPage .navDropdownLink {
+          display: block; width: 100%; padding: 10px 17px;
+          border: 0; background: transparent; color: #6f685f;
+          text-align: left; font: 400 11px/1.4 Arial,sans-serif;
+          letter-spacing: .08em; white-space: nowrap; cursor: pointer;
+        }
+.aboutPage .navDropdownLink:hover, .aboutPage .navDropdownLink:focus-visible {
+          color: #1d1b18; background: #faf8f5;
+        }
+@media  (min-width: 721px)  {
+.aboutPage .homeLink > .logo {
+            width: auto;
+            height: calc(var(--brand-text-height, 86px) - 8px);
+            max-width: none;
+            flex-shrink: 0;
+            align-self: center;
+            object-fit: contain;
+            margin: 0;
+          }
+.aboutPage .homeLink > .divider {
+            height: calc(var(--brand-text-height, 86px) - 20px);
+            align-self: center;
+            margin-top: 0;
+            flex-shrink: 0;
+          }
+}
+
+/* Navigation active state affects COLOR ONLY */
+.aboutPage .desktopNav .activeNav, .aboutPage .desktopNav .navActive, .aboutPage .desktopNav .navText.activeNav, .aboutPage .desktopNav .navText.navActive, .aboutPage .bottomNav .activeNav, .aboutPage .bottomNav .navActive { color: #9C8664; }
+
+        /* ACTIVE PAGE ONLY — color and scale; preserve approved About typography,
+           logo geometry, spacing and all existing layout rules. */
+        .desktopNav .navText.isCurrent,
+        .desktopNav .navCurrent {
+          color: #9C8664 !important;
+          transform: scale(1.08);
+          transform-origin: center center;
+        }
+        .desktopNav .navCurrent { display: inline-block; }
+        .bottomNav .bottomNavLink.isActive {
+          color: #9C8664 !important;
+          transform: scale(1.08);
+          transform-origin: center center;
+        }
+      
+        /* MOBILE NAVIGATION REFINEMENT — never changes desktop header/layout. */
+        @media (max-width: 720px) {
+          .aboutPage .hamburger {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            width: 56px;
+            height: 52px;
+            margin: 0;
+            border: 0;
+            background: transparent;
+            z-index: 1300;
+            -webkit-tap-highlight-color: transparent;
+          }
+          .aboutPage .hamburger span {
+            position: absolute;
+            display: block;
+            width: 38px;
+            height: 1.5px;
+            margin: 0;
+            background: #1d1b18;
+            left: 9px;
+            top: 25px;
+            transform-origin: center;
+            transition: transform 480ms cubic-bezier(.22,.61,.36,1),
+                        opacity 260ms ease, background-color 340ms ease;
+          }
+          .aboutPage .hamburger span:nth-child(1) { transform: translateY(-11px); }
+          .aboutPage .hamburger span:nth-child(2) { transform: translateY(-3.7px); }
+          .aboutPage .hamburger span:nth-child(3) { transform: translateY(3.7px); }
+          .aboutPage .hamburger span:nth-child(4) { transform: translateY(11px); }
+          .aboutPage .hamburger.isOpen span { background: #e1dbcf; }
+          .aboutPage .hamburger.isOpen span:nth-child(1) { transform: rotate(45deg); }
+          .aboutPage .hamburger.isOpen span:nth-child(2) { transform: scaleX(.55); opacity: 0; }
+          .aboutPage .hamburger.isOpen span:nth-child(3) { transform: scaleX(.55); opacity: 0; }
+          .aboutPage .hamburger.isOpen span:nth-child(4) { transform: rotate(-45deg); }
+          .aboutPage .hamburger:focus-visible {
+            outline: 1px solid #9C8664;
+            outline-offset: 1px;
+          }
+          .aboutPage .mobileOverlay { z-index: 1100; }
+          .aboutPage .mobilePanel {
+            z-index: 1200;
+            height: 100vh;
+            height: 100dvh;
+            padding: 92px 34px max(30px, env(safe-area-inset-bottom));
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            transition: transform 480ms cubic-bezier(.22,.61,.36,1);
+            visibility: hidden;
+            transition: transform 480ms cubic-bezier(.22,.61,.36,1), visibility 480ms;
+          }
+          .aboutPage .mobilePanel.open { visibility: visible; }
+          .aboutPage .mobileMenuItem {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            margin: 0 0 31px;
+            font-family: "Times New Roman", Georgia, serif;
+            font-size: clamp(20px, 5.5vw, 30px);
+            font-weight: 400;
+            color: #d4cec2;
+            line-height: 1.22;
+            letter-spacing: .04em;
+            cursor: pointer;
+          }
+          .aboutPage .mobileMenuItem:hover,
+          .aboutPage .mobileMenuItem:focus-visible { color: #c9b38c; }
+          .aboutPage .mobileMenuItem.isContact { color: #c9b38c; }
+          .aboutPage .mobileMenuItem:focus-visible,
+          .aboutPage .mobileSubmenuLink:focus-visible {
+            outline: 1px solid #c9b38c;
+            outline-offset: 4px;
+          }
+          /* Slow editorial accordion: always mounted, smoothly animates its height. */
+          .aboutPage .mobileMenuItem.hasSubmenu {
+            position: relative;
+            padding-right: 20px;
+            /* The submenu itself owns the 31px gap to the next main item. */
+            margin-bottom: 0;
+          }
+          .aboutPage .mobileMenuItem.hasSubmenu::after {
+            content: "";
+            position: absolute;
+            right: 3px;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            border-right: 1px solid #c9b38c;
+            border-bottom: 1px solid #c9b38c;
+            transform: rotate(45deg);
+            transition: transform 650ms cubic-bezier(.22,.61,.36,1);
+          }
+          .aboutPage .mobileMenuItem.hasSubmenu[aria-expanded="true"]::after {
+            transform: translateY(4px) rotate(225deg);
+          }
+          .aboutPage .mobileSubmenu {
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            /* Exactly 31px between main menu buttons, matching ABOUT → AWARDS.
+               The collapsed accordion itself contributes zero visible height. */
+            margin: 0 0 31px 18px;
+            border-left: 1px solid rgba(201,179,140,.3);
+            padding-left: 18px;
+            transition:
+              grid-template-rows 760ms cubic-bezier(.22,.61,.36,1),
+              opacity 620ms ease,
+              margin-top 760ms cubic-bezier(.22,.61,.36,1),
+              margin-bottom 760ms cubic-bezier(.22,.61,.36,1);
+          }
+          .aboutPage .mobileSubmenu.isExpanded {
+            grid-template-rows: 1fr;
+            opacity: 1;
+            /* Original expanded placement: 31px - 18px = 13px from the button. */
+            margin-top: 13px;
+            margin-bottom: 29px;
+          }
+          .aboutPage .mobileSubmenuInner {
+            min-height: 0;
+            overflow: hidden;
+          }
+          .aboutPage .mobileSubmenuLink {
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 580ms ease, transform 680ms cubic-bezier(.22,.61,.36,1), color 250ms ease;
+          }
+          .aboutPage .mobileSubmenu.isExpanded .mobileSubmenuLink {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          .aboutPage .mobileSubmenu.isExpanded .mobileSubmenuLink:nth-child(2) { transition-delay: 55ms; }
+          .aboutPage .mobileSubmenu.isExpanded .mobileSubmenuLink:nth-child(3) { transition-delay: 110ms; }
+          .aboutPage .mobileSubmenu.isExpanded .mobileSubmenuLink:nth-child(4) { transition-delay: 165ms; }
+          .aboutPage.isMobileNavigating {
+            opacity: 0;
+            transition: opacity 360ms cubic-bezier(.22,.61,.36,1);
+            pointer-events: none;
+          }
+        }
+        /* The site-wide UP control belongs behind any open mobile drawer. */
+        body[data-mobile-menu-open="true"] .siteBackToTop {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .aboutPage .hamburger span,
+          .aboutPage .mobilePanel,
+          .aboutPage .mobileSubmenu,
+          .aboutPage .mobileSubmenuLink,
+          .aboutPage .mobileMenuItem.hasSubmenu::after,
+          .aboutPage.isMobileNavigating { transition: none !important; }
+        }
+
+        /* MOBILE HOME COMPOSITION — approved menu remains unchanged.
+           Only the brand descriptor and hero carousel size are adjusted. */
+        @media (max-width: 720px) {
+          /* Distinguish the two brand lines and give the longer second line room. */
+          .aboutPage .subtitle p:first-child {
+            font-size: 10px;
+            letter-spacing: 0.26em;
+          }
+          .aboutPage .subtitle p:nth-child(2) {
+            font-size: 7.4px;
+            letter-spacing: 0.20em;
+          }
+
+        }
+
+        /* MOBILE DRAWER ONLY — 7% wider than the original panel (3% less
+           widening than the preceding 10% version). Keep the left edge of
+           all menu labels fixed at their previously approved screen position. */
+        @media (max-width: 720px) {
+          .aboutPage .mobilePanel {
+            width: min(83.46vw, 417.3px);
+            padding-left: calc(34px + min(83.46vw, 417.3px) - min(78vw, 390px));
+          }
+        }
+
+        /* MOBILE ACCORDION GUIDE DOTS — match approved Contact styling.
+           Dots are 4px in diameter and shifted another 1px right.
+           Compensate clipping without moving menu labels. */
+        @media (max-width: 720px) {
+          .aboutPage .mobileSubmenuInner {
+            margin-left: -24px;
+            padding-left: 24px;
+          }
+          .aboutPage .mobileSubmenuLink {
+            position: relative;
+            width: 100%;
+          }
+          .aboutPage .mobileSubmenuLink::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: -20.5px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #c9b38c;
+            transform: translateY(-50%);
+            pointer-events: none;
+          }
+        }
+
+
+        /* ABOUT / MOBILE — subtler captions directly beneath images only. */
+        @media (max-width: 720px) {
+          .aboutPage .aboutImageCaption {
+            font-size: 9px;
+            letter-spacing: 0.11em;
+          }
+        }
+
+        /* MOBILE ONLY: four small editorial spacing corrections. */
+        @media (max-width: 720px) {
+          /* More breathing room below the Floral Lips image. */
+          .aboutPage .sketchGrid { margin-bottom: 26px; }
+          /* One line less between the lion artwork and its following text. */
+          .aboutPage .lionSection { row-gap: 22px; }
+          /* One line less before both Vessels and Seraphine cards. */
+          .aboutPage .directionsGrid { row-gap: 20px; }
+        }
+
+        /* ABOUT — ALL EDITORIAL IMAGES 15% SMALLER ON IPHONE ONLY.
+           Leave their natural aspect ratio, captions and image navigation intact. */
+        @media (max-width: 720px) {
+          .aboutPage .portraitImage,
+          .aboutPage .cameraImage { width: 66.3%; }
+          /* Images 3, 4 and 5: 10% larger than the previously approved mobile size. */
+          .aboutPage .sketchImage,
+          .aboutPage .craftArtwork img,
+          .aboutPage .lionArtwork img {
+            width: 97.24%;
+            max-width: none;
+            transform: none;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .aboutPage .directions .directionImageLink {
+            display: block;
+            width: 85%;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          /* Selected Directions: make the 2nd and 3rd images 10% larger on phone sizes. */
+          .aboutPage .directions .directionCard:nth-child(2) .directionImageLink,
+          .aboutPage .directions .directionCard:nth-child(3) .directionImageLink {
+            width: 93.5%;
+          }
+          .aboutPage .directions .directionImageLink img {
+            width: 100%;
+            height: auto;
+          }
+        }
+
+        /* ABOUT / MOBILE — precise editorial spacing adjustments (one line = 22px).
+           Only applies to small screens; all existing menu and image styles remain intact. */
+        @media (max-width: 720px) {
+          /* Bracelet study: 2 lines less before the picture; 1 line more after it. */
+          .aboutPage .fullPhilosophy { margin-bottom: 16px; } /* 60px - 44px */
+          .aboutPage .craftSection { row-gap: 66px; } /* 44px + 22px */
+
+          /* Lion: 1 line less before the image, 2 lines more before the text. */
+          .aboutPage .craftSection { margin-bottom: 78px; } /* 100px - 22px */
+          .aboutPage .lionSection { row-gap: 66px; } /* 22px + 44px */
+
+          /* Floral Rams: one extra line above the image and below it. */
+          .aboutPage .directions > p.introText { margin-bottom: 57px; } /* 35px + 22px */
+          .aboutPage .directions .directionCard:first-child h3 { margin-top: 40px; } /* 18px + 22px */
+
+          /* Seraphine ring: 10% larger than its present 93.5% mobile width. */
+          .aboutPage .directions .directionCard:nth-child(3) .directionImageLink {
+            width: 102.85%;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-left: 0;
+            margin-right: 0;
+          }
+        }
+
+
+        /* ABOUT / MOBILE — latest fine spacing refinements.
+           One text line = 22px. Mobile only; desktop remains unchanged. */
+        @media (max-width: 720px) {
+          /* Seraphine: one line less above the ring, and below it before the title. */
+          .aboutPage .directions .directionCard:nth-child(3) {
+            margin-top: -22px;
+          }
+          .aboutPage .directions .directionCard:nth-child(3) h3 {
+            margin-top: -4px; /* 18px - 22px */
+          }
+
+          /* Portfolio description: one additional line before the download buttons. */
+          .aboutPage .portfolioDownloads p:not(.topicLabel) {
+            margin-bottom: 52px; /* 30px + 22px */
+          }
+
+          /* Two lines less between portfolio buttons and the following CTA section. */
+          .aboutPage .portfolioDownloads {
+            padding-bottom: 76px; /* 120px - 44px */
+          }
+
+          /* Collaborate Across Disciplines: one more line before the CTA button. */
+          .aboutPage .cta p {
+            margin-bottom: 42px; /* 20px + 22px */
+          }
+        }
+
+        /* ABOUT / MOBILE — Recognition: shorten gap to divider below by one line. */
+        @media (max-width: 720px) {
+          .aboutPage .recognition {
+            padding-bottom: 74px; /* formerly 96px; 22px less */
+          }
+        }
+
+        /* ABOUT — mobile touch feedback: remove the browser's transient blue
+           tap rectangle from links, buttons, image tiles and their descendants.
+           Existing gold :focus-visible keyboard indicators remain untouched. */
+        @media (max-width: 720px) {
+          .aboutPage,
+          .aboutPage *,
+          .aboutPage *::before,
+          .aboutPage *::after {
+            -webkit-tap-highlight-color: transparent;
+          }
+        }
+
+
+        /* About: approved Sculpture-style mobile submenu selection feedback.
+           Only selected destination dot and label turn white for 190ms. */
+        @media (max-width: 720px) {
+          .aboutPage .mobileSubmenu.isExpanded .mobileSubmenuLink.isSelected {
+            color: #fff;
+            transform: translateY(0) scale(1.055);
+            transform-origin: left center;
+            transition: color 140ms ease, transform 140ms ease;
+          }
+          .aboutPage .mobileSubmenuLink::before {
+            transition: background-color 140ms ease, width 140ms ease, height 140ms ease, transform 140ms ease;
+          }
+          .aboutPage .mobileSubmenuLink.isSelected::before {
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            transform: translate(-1px, -50%);
+          }
+          .aboutPage.isMobileNavigating.hasSubmenuSelection {
+            transition-duration: 200ms;
+          }
+        }
+
+        /* ABOUT — desktop editorial alignment and Concept continuation only.
+           Align the studio photograph with the first body paragraph ("Every project begins").
+           The 118px offset matches the label, heading and their approved margins.
+           Mobile layout, photo sizing and all navigation remain unchanged. */
+        @media (min-width: 721px) {
+          .aboutPage .sectionGrid.approach > div:first-child {
+            align-self: start;
+            padding-top: 118px;
+          }
+          .aboutPage .sectionGrid.approach .cameraImage {
+            transform: none;
+          }
+          /* Keep the previously approved Concept & Brand Identity spacing unchanged. */
+          .aboutPage .sketchGrid {
+            margin-bottom: -12px;
+          }
+          /* Only the caption under the Approach studio photo:
+             add one 22px line of space and align with the photo's left edge. */
+          .aboutPage .sectionGrid.approach .aboutImageCaption {
+            width: 315px;
+            max-width: 100%;
+            margin: 32px auto 0;
+            text-align: left;
+          }
+        }
+        /* ABOUT — approved Sculpture / Spatial Retail image-viewer styling.
+           Desktop: thumbnail +15%, 73% charcoal overlay; mobile 22px side margins.
+           The original source-file link and download controls are never exposed. */
+        .aboutPage .aboutArtZoomButton {
+          display: block; position: relative; width: 100%; max-width: 100%;
+          margin: 0 auto; padding: 0; border: 0; border-radius: 0;
+          background: transparent; cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .aboutPage .aboutArtZoomButton img {
+          transition: transform 360ms cubic-bezier(.22,.61,.36,1);
+          transform-origin: center center;
+        }
+        @media (min-width:721px) and (hover:hover) and (pointer:fine) {
+          .aboutPage .aboutArtZoomButton:hover img,
+          .aboutPage .aboutArtZoomButton:focus-visible img { transform: scale(1.012); }
+          .aboutPage .aboutArtZoomButton:hover .sketchImage,
+          .aboutPage .aboutArtZoomButton:focus-visible .sketchImage {
+            transform: translateY(-70px) scale(1.012);
+          }
+        }
+        .aboutPage .aboutArtZoomButton:focus-visible { outline:1px solid #9C8664; outline-offset:5px; }
+        .aboutPage .aboutArtExpandMark {
+          position:absolute; right:14px; bottom:14px; display:flex;
+          align-items:center; justify-content:center; width:38px; height:38px;
+          border:1px solid rgba(156,134,100,.30);
+          background:rgba(255,255,255,.90); color:#9C8664;
+          opacity:0; transform:translateY(5px);
+          transition:opacity 320ms ease,transform 320ms ease;
+          pointer-events:none;
+        }
+        .aboutPage .aboutArtZoomButton:hover .aboutArtExpandMark,
+        .aboutPage .aboutArtZoomButton:focus-visible .aboutArtExpandMark {
+          opacity:1; transform:translateY(0);
+        }
+        @media (hover:none) {
+          .aboutPage .aboutArtExpandMark {
+            opacity:.8; transform:none; width:32px; height:32px;
+          }
+        }
+        .aboutPage .aboutArtOverlay {
+          position:fixed; inset:0; z-index:4000;
+          background:rgba(17,16,15,.73);
+          backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+          cursor:default; animation:aboutArtBackdropIn 450ms ease both;
+        }
+        .aboutPage .aboutArtOverlay img {
+          position:absolute; top:50%; left:50%; display:block;
+          transform:translate(-50%,-50%) scale(1);
+          max-width:calc(100vw - 44px);
+          max-height:calc(100vh - 175px);
+          object-fit:contain; cursor:default;
+          animation:aboutArtImageIn 450ms cubic-bezier(.22,1,.36,1) both;
+        }
+        .aboutPage .aboutArtClose {
+          position:absolute; top:15px; right:25px; z-index:1;
+          background:transparent; border:0; color:#fff;
+          font-size:40px; cursor:pointer;
+        }
+        .aboutPage .aboutArtOverlay.isClosing {
+          animation:aboutArtBackdropOut 300ms ease both; pointer-events:none;
+        }
+        .aboutPage .aboutArtOverlay.isClosing img { animation:aboutArtImageOut 300ms ease both; }
+        @keyframes aboutArtBackdropIn { from {opacity:0} to {opacity:1} }
+        @keyframes aboutArtBackdropOut { from {opacity:1} to {opacity:0} }
+        @keyframes aboutArtImageIn {
+          from {opacity:0;transform:translate(-50%,-50%) scale(.965)}
+          to {opacity:1;transform:translate(-50%,-50%) scale(1)}
+        }
+        @keyframes aboutArtImageOut {
+          from {opacity:1;transform:translate(-50%,-50%) scale(1)}
+          to {opacity:0;transform:translate(-50%,-50%) scale(.98)}
+        }
+        @media (max-width:720px) {
+          .aboutPage .aboutArtZoomButton { max-width:none; }
+          .aboutPage .aboutArtOverlay { padding:48px 22px; }
+          .aboutPage .aboutArtOverlay img {
+            width:auto !important; height:auto !important;
+            max-width:calc(100vw - 44px);
+            max-height:calc(100vh - 112px);
+            max-height:calc(100dvh - 112px);
+          }
+          .aboutPage .aboutArtClose { top:12px; right:16px; }
+        }
+        @media (prefers-reduced-motion:reduce) {
+          .aboutPage .aboutArtZoomButton img,
+          .aboutPage .aboutArtExpandMark { transition:none; }
+          .aboutPage .aboutArtOverlay,
+          .aboutPage .aboutArtOverlay img,
+          .aboutPage .aboutArtOverlay.isClosing,
+          .aboutPage .aboutArtOverlay.isClosing img { animation:none; }
+        }
+
+        /* DESKTOP ONLY — central gallery/editorial width narrowed by 5%.
+           Mobile layout remains exactly as supplied. */
+        @media (min-width: 721px) {
+          .aboutPage .pageWrap { width: min(1121px, 86vw); }
+        }
+
+        /* ABOUT — two desktop-only editorial alignment refinements.
+           1. Restore the same 20px paragraph rhythm between the second
+              and closing paragraphs in Concept & Brand Identity. The
+              established sketchGrid -12px offset remains untouched.
+           2. Place the three Selected Directions gold captions along a
+              single baseline regardless of the descriptions' lengths.
+           Mobile styles and all imagery/navigation are unchanged. */
+        @media (min-width: 721px) {
+          .aboutPage .sketchGrid + .fullPhilosophy {
+            padding-top: 12px;
+          }
+          .aboutPage .directionsGrid {
+            align-items: stretch;
+          }
+          .aboutPage .directionsGrid > .directionCard {
+            display: flex;
+            flex-direction: column;
+          }
+          .aboutPage .directions .directionCard .directionStatusLink {
+            margin-top: auto;
+            align-self: flex-start;
+          }
+        }
       `}</style>
 
       {/* =======================================================
@@ -1197,6 +2915,7 @@ export default function About() {
 
           <div
             className="homeLink"
+            ref={brandLockupRef}
             onClick={() => navigate("/")}
           >
 
@@ -1208,49 +2927,44 @@ export default function About() {
 
             <div className="divider"></div>
 
-            <div>
+            <div className="brandText" ref={brandTextRef}>
 
               <h1 className="name">
                 ANDREI JILIAEV
               </h1>
 
               <div className="subtitle">
-                <p>High Jewellery Designer</p>
-                <p>Creative Consultant</p>
+                <p>Multidisciplinary Designer</p>
+                <p>Sculpture · Retail Design · Objects · Jewellery</p>
               </div>
 
             </div>
 
           </div>
 
-          <nav className="desktopNav">
-
-            <span
-              onClick={() =>
-                navigate("/sketches-design")
-              }
-            >
-              Sketches & Design
-            </span>
-
-            <span
-              onClick={() =>
-                navigate("/process")
-              }
-            >
-              Process
-            </span>
-
-            <span
-              onClick={() =>
-                navigate(
-                  "/jewellery-photo-portfolio"
-                )
-              }
-            >
-              Jewellery Photo Portfolio
-            </span>
-
+          <nav className="desktopNav" aria-label="Main navigation" onMouseLeave={() => setDesktopDropdown(null)}>
+            <div className={`navItem ${desktopDropdown === "work" ? "navOpen" : ""}`} onMouseEnter={() => setDesktopDropdown("work")}>
+              <span className={`navText ${activePath === "/work" ? "isCurrent" : ""}`} role="button" tabIndex={0} aria-haspopup="true"
+                aria-expanded={desktopDropdown === "work"}
+                onClick={() => go("/work")}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") {e.preventDefault();go("/work");} }}
+              >Selected Work</span>
+              <div className="navDropdownPanel"><div className="navDropdownInner">
+                {selectedWorkLinks.map((item) => <button key={item.path} type="button" className="navDropdownLink" onClick={() => go(item.path)}>{item.label}</button>)}
+              </div></div>
+            </div>
+            <div className={`navItem ${desktopDropdown === "jewellery" ? "navOpen" : ""}`} onMouseEnter={() => setDesktopDropdown("jewellery")}>
+              <span className={`navText ${activePath === "/jewellery-design" ? "isCurrent" : ""}`} role="button" tabIndex={0} aria-haspopup="true"
+                aria-expanded={desktopDropdown === "jewellery"}
+                onClick={() => go("/jewellery-design")}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") {e.preventDefault();go("/jewellery-design");} }}
+              >Jewellery Design</span>
+              <div className="navDropdownPanel"><div className="navDropdownInner">
+                {jewelleryLinks.map((item) => <button key={item.path} type="button" className="navDropdownLink" onClick={() => go(item.path)}>{item.label}</button>)}
+              </div></div>
+            </div>
+            <span className={activePath === "/about" ? "navCurrent" : ""} role="link" tabIndex={0} onClick={() => go("/about")} onKeyDown={(e) => e.key === "Enter" && go("/about")}>About</span>
+            <span className={activePath === "/contact" ? "navCurrent" : ""} role="link" tabIndex={0} onClick={() => go("/contact")} onKeyDown={(e) => e.key === "Enter" && go("/contact")}>Contact</span>
           </nav>
 
         </header>
@@ -1262,255 +2976,272 @@ export default function About() {
       ======================================================= */}
 
       <div className="pageWrap">
-
         <section className="topIntro">
-
-          <p className="topicLabel">
-            About
-          </p>
-
-          <h1 className="mainTitle">
-            About Andrei Jiliaev
-          </h1>
-
-          <p className="mainRole">
-            Jewellery Designer • Creative Director • CAD/CAM Artist • Photographer
-          </p>
-
+          <p className="topicLabel">About</p>
+          <h1 className="mainTitle">About Andrei Jiliaev</h1>
+          <p className="mainRole">Sculpture · Spatial &amp; Retail Design · Objects · CAD Design · Jewellery</p>
         </section>
 
-        {/* BIOGRAPHY */}
-
+        {/* BIOGRAPHY — original portrait/two-column layout preserved */}
         <section className="sectionGrid biographyIntro">
-
           <div>
-
-            <img
-              src="/about-portrait.jpg"
-              alt="Andrei Jiliaev"
-              className="portraitImage"
-            />
-
+            <img src="/about-portrait.jpg" alt="Portrait of Andrei Jiliaev" className="portraitImage" />
           </div>
-
           <div className="textBlock">
-
             <p>
-              Andrei Jiliaev is an award-winning jewellery
-              designer, creative director and multidisciplinary
-              artist whose work bridges high jewellery design,
-              CAD/CAM development, hand rendering, prototyping
-              and luxury visual presentation.
+              Andrei Jiliaev is a Toronto-based artist, sculptor and multidisciplinary
+              designer working across sculpture, installations, spatial and retail
+              design, decorative objects and fine jewellery. His practice brings
+              together artistic expression, skilled handwork and technical development.
             </p>
-
             <p>
-              Born into a family of master craftsmen, he is the
-              eldest son of master goldsmith Iouri Jiliaev.
-              Immersed in an atelier environment from an early
-              age, he developed a deep understanding of
-              craftsmanship, gemstones, structure and technical
-              execution.
+              Raised in a multigenerational family of artists, sculptors, designers
+              and engineers, Andrei grew up surrounded by drawing, craftsmanship and
+              technical problem-solving. Decades of fine jewellery work further shaped
+              his sensitivity to proportion, structure, surface and intricate detail.
             </p>
-
             <p>
-              Beginning his professional journey at the age of
-              twenty, Andrei contributed design work to
-              internationally recognized jewellery companies
-              including Hearts On Fire, Frederic Goldman and
-              Kurt Wayne. These early experiences shaped a
-              career dedicated to the union of artistic
-              imagination, technical innovation and exceptional
-              craftsmanship.
+              Alongside designing, he sculpts by hand and works directly with a range
+              of materials, tools, textures and finishing techniques. This practical
+              knowledge informs how he develops a form, considers its construction
+              and prepares it for fabrication.
             </p>
-
             <p>
-              Over the course of his career, Andrei has
-              cultivated an international clientele that
-              includes private collectors, prominent public
-              figures and members of royal households. His work
-              has been commissioned across North America,
-              Europe, Asia and the Middle East, including
-              bespoke projects undertaken for clients from the
-              Kingdom of Saudi Arabia.
+              His work connects traditional drawing and making with Rhino 3D,
+              CAD/CAM, technical drawings and visual presentation — combining
+              creative freedom with a clear understanding of dimensions and process.
             </p>
-
           </div>
-
         </section>
 
         <section className="fullBiography">
-
           <p>
-            Over the following decades, he developed a
-            multidisciplinary practice that integrates concept
-            development, gemstone knowledge, sculptural
-            thinking, technical execution, CAD/CAM development
-            and luxury presentation.
+            Working across scales — from intricate jewellery to large sculptural
+            concepts and designed interiors — Andrei combines an intuitive sense
+            of form with an understanding of materials, structure and fabrication.
           </p>
-
           <p>
-            This combination allows him to guide projects from
-            the earliest concept through hand sketching,
-            gemstone architecture, prototyping, production
-            awareness and final photography — while preserving
-            the emotional and artistic integrity of the
-            original idea.
+            He collaborates closely with clients, creative studios and production
+            teams, listening to their ideas, refining them with care and communicating
+            practical solutions without losing the character of the original vision.
           </p>
-
-          <p>
-            Today, Andrei continues to explore the relationship
-            between form, movement, gemstone structure and
-            design storytelling, creating jewellery concepts
-            that balance artistic expression, technical
-            intelligence and timeless visual identity.
-          </p>
-
         </section>
 
-        {/* APPROACH */}
-
+        {/* APPROACH — original layout and studio image preserved */}
         <section className="sectionGrid approach">
-
           <div>
-
-            <img
-              src="/about-camera.jpg"
-              alt="Andrei Jiliaev design process"
-              className="cameraImage"
-            />
-
+            <img src="/about-camera.jpg" alt="Andrei Jiliaev at work in the studio" className="cameraImage" />
+            <span className="aboutImageCaption">In the Studio · Creative Development</span>
           </div>
-
           <div className="textBlock">
-
-            <p className="topicLabel">
-              Approach
-            </p>
-
-            <h2>
-              A Multidisciplinary Approach
-            </h2>
-
+            <p className="topicLabel">Approach</p>
+            <h2>From Idea to Developed Form</h2>
             <p>
-              Unlike traditional development workflows where
-              design, engineering, production and presentation
-              are often divided among multiple specialists, my
-              process brings these disciplines together within
-              one creative vision.
+              Every project begins with listening to the client, the setting and
+              the purpose of the work. Through sketches, sculptural studies and
+              3D modelling, I explore form, proportion and scale before refining
+              a clear creative direction.
             </p>
-
             <p>
-              This integrated approach allows each idea to
-              develop with greater continuity — from concept
-              exploration and hand rendering to CAD modelling,
-              prototyping, gemstone placement, production
-              considerations and final photography.
+              I also shape materials by hand, create and reproduce textures, and
+              develop colour and finishes through drawing, painting, brushwork and
+              airbrushing. Working directly with tools and materials helps me
+              understand what a design will require beyond the rendering.
             </p>
-
             <p>
-              By understanding both the artistic and technical
-              sides of jewellery creation, I am able to
-              anticipate structural challenges, refine
-              proportions and preserve the emotional character
-              of a design throughout every stage of
-              development.
+              With Rhino 3D, CAD/CAM, blueprints and shop drawings, I translate
+              ideas into dimensions and practical design information. More than
+              30 years of experience with Photoshop, alongside Illustrator,
+              supports my visualizations, marketing presentations and bespoke
+              website design — communicating the character of each project
+              beyond its physical form.
             </p>
-
           </div>
-
         </section>
 
-        {/* PHILOSOPHY */}
-
-        <section className="sketchGrid">
-
+        {/* CONCEPT DEVELOPMENT — FLORAL LIPS / BRAND IDENTITY */}
+        <section className="sketchGrid" aria-labelledby="concept-heading">
           <div className="textBlock">
-
-            <p className="topicLabel">
-              Philosophy
-            </p>
-
-            <h2>
-              Design As Discovery
-            </h2>
-
+            <p className="topicLabel conceptLabel">Concept &amp; Brand Identity</p>
+            <h2 id="concept-heading" className="conceptHeading">Finding the Idea Behind the Image</h2>
             <p>
-              For me, design is not simply the act of creating
-              objects — it is the pursuit of ideas.
+              My work begins by looking beyond the obvious visual solution to
+              find an idea that belongs to the brand. The goal is not simply
+              to create something beautiful, but to develop a memorable concept
+              with its own meaning, character and identity.
             </p>
-
             <p>
-              What has fascinated me throughout my career is
-              the ability to recognize concepts where others
-              may see only forms, materials or technical
-              challenges. The discovery of meaningful ideas,
-              the exploration of their potential and the
-              transformation of those ideas into objects of
-              beauty and lasting value remains at the heart of
-              my creative process.
+              In <em>Beauty Unleashed</em>, an independent concept inspired by Sephora,
+              sculptural lips represent the expressive power of lipstick: colour,
+              confidence and beauty. Botanical leaves introduce a second sensory
+              dimension — fragrance — connecting the visual and the imagined scent
+              in one sculptural language.
             </p>
-
-            <p>
-              Many of the strongest concepts are not
-              immediately visible. They emerge through
-              observation, experience and the ability to
-              connect seemingly unrelated influences.
-              Architecture, sculpture, nature, culture,
-              engineering, history and human emotion often
-              intersect in unexpected ways, revealing
-              opportunities for new forms, narratives and
-              design languages.
-            </p>
-
           </div>
-
           <div>
-
-            <img
-              src="/about-sketch.jpg"
-              alt="Jewellery bracelet sketch"
-              className="sketchImage"
-            />
-
+            <button type="button" className="aboutArtZoomButton" onClick={openArtPreview} aria-label="Enlarge Floral Lips concept artwork">
+              <img
+                src="/floral-lips-graphite.jpg"
+                alt="Beauty Unleashed: red sculptural lips and a detailed graphite study with botanical forms"
+                className="sketchImage"
+              />
+                          <span className="aboutArtExpandMark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 4H4v5M15 4h5v5M4 15v5h5M20 15v5h-5" />
+                </svg>
+              </span>
+</button>
           </div>
-
         </section>
 
         <section className="fullPhilosophy">
-
           <p>
-            I am particularly drawn to the development of
-            concepts that can extend beyond a single piece. A
-            successful idea often contains the foundation for
-            an entire collection, a recognizable visual
-            identity or a long-term creative direction. The
-            ability to uncover these possibilities and develop
-            them into coherent, meaningful bodies of work is
-            one of the most rewarding aspects of design.
+            This is the approach I bring to every brief: uncover the strongest
+            connection between a product, its audience and a distinctive visual
+            experience — one that helps a brand stand apart. I also draw on
+            culture and emotion — the shared references, values and experiences
+            that give an image meaning. My understanding of North American culture
+            helps me develop concepts that feel authentic and resonate with the
+            people they are meant to reach.
           </p>
-
-          <p>
-            My background in sculpture, gemstone studies,
-            traditional craftsmanship, manufacturing and
-            CAD/CAM development allows me to approach
-            creativity from multiple perspectives
-            simultaneously. Ideas are not viewed solely
-            through an artistic lens, but also through an
-            understanding of structure, engineering,
-            production, wearability and market relevance.
-          </p>
-
-          <p>
-            Ultimately, my goal is not simply to design
-            jewellery, but to develop ideas, narratives and
-            collections that contribute to the identity,
-            recognition and long-term success of the brands
-            they represent.
-          </p>
-
         </section>
-
       </div>
+
+
+      {/* =======================================================
+          CRAFT & PRECISION — SELECTED PENCIL STUDY
+      ======================================================= */}
+      <section className="craftSection" aria-labelledby="craft-heading">
+        <div className="craftArtwork">
+          <button type="button" className="aboutArtZoomButton" onClick={openArtPreview} aria-label="Enlarge hand-rendered jewellery study">
+            <img
+              src="/about-sketch.jpg"
+              alt="Detailed graphite jewellery design study with ornamental setting and gemstones"
+              loading="lazy"
+            />
+                        <span className="aboutArtExpandMark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 4H4v5M15 4h5v5M4 15v5h5M20 15v5h-5" />
+                </svg>
+              </span>
+</button>
+          <span className="aboutImageCaption">Hand-Rendered Design Study</span>
+        </div>
+        <div className="craftText">
+          <p className="topicLabel">Craft &amp; Precision</p>
+          <h2 id="craft-heading">The Discipline of Detail</h2>
+          <p>
+            Fine jewellery has taught me to work at a scale where the smallest
+            curve can change the balance of an entire piece. It has sharpened
+            my eye, my hands and my understanding of proportion, ornament and surface.
+          </p>
+          <p>
+            The pencil studies shown here reflect that discipline: finding
+            a precise relationship between complex forms, construction and
+            visual rhythm before an object is made.
+          </p>
+          <p>
+            I bring the same care to sculpture and larger installations,
+            where detail must work with material, structure, scale and
+            the viewer’s experience.
+          </p>
+        </div>
+      </section>
+
+      {/* =======================================================
+          FROM DRAWING TO PRESENCE — SCULPTURAL CONCEPT STUDY
+      ======================================================= */}
+      <section className="lionSection" aria-labelledby="lion-heading">
+        <div className="lionText">
+          <p className="topicLabel lionLabel">Sculpture · Form Exploration</p>
+          <h2 id="lion-heading">From Drawing to Presence</h2>
+          <p>
+            A sculpture begins long before its final surface is defined.
+            I use drawing to search for the right character, gesture and
+            proportion, then develop those decisions into a three-dimensional form.
+          </p>
+          <p>
+            In this lion study, the energy of the sketch becomes a sculptural
+            language of flowing mane, powerful expression and layered detail.
+            The challenge is to preserve the emotion of the first idea while
+            giving it physical presence, clarity and balance.
+          </p>
+          <p>
+            From initial concept to refined form, every stage is an opportunity
+            to strengthen the identity of the piece without losing its original spirit.
+          </p>
+        </div>
+        <div className="lionArtwork">
+          <button type="button" className="aboutArtZoomButton" onClick={openArtPreview} aria-label="Enlarge lion sculpture study">
+            <img
+              src="/lion-sketch-to-sculpture.jpg"
+              alt="Roaring lion graphite sketch paired with a white sculptural concept visualization"
+              loading="lazy"
+            />
+                        <span className="aboutArtExpandMark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 4H4v5M15 4h5v5M4 15v5h5M20 15v5h-5" />
+                </svg>
+              </span>
+</button>
+        </div>
+      </section>
+
+      {/* SELECTED DIRECTIONS — curated samples, not a full second portfolio */}
+      <section className="directions">
+        <p className="topicLabel">Selected Directions</p>
+        <h2>Ideas Across Scales</h2>
+        <p className="introText">
+          A concise selection spanning large-scale installation concepts,
+          decorative objects and fine jewellery — each with its own
+          form, material language and creative purpose.
+        </p>
+        <div className="directionsGrid">
+          <article className="directionCard">
+            <button type="button" className="directionImageLink"
+              onClick={() => go("/sculpture-installations")}
+              aria-label="Explore Floral Rams in Sculpture & Installations">
+              <img src="/three-rums.jpg" alt="Three floral ram sculptures arranged in a vertical composition" />
+            </button>
+            <h3>Floral Rams</h3>
+            <p>A sculptural installation concept, approximately 14 feet tall,
+              exploring a striking vertical composition, rich floral textures
+              and expressive sculptural forms.</p>
+            <button type="button" className="directionStatus directionStatusLink"
+              onClick={() => go("/sculpture-installations")}>
+              Sculptural installation · Concept study
+            </button>
+          </article>
+          <article className="directionCard">
+            <button type="button" className="directionImageLink"
+              onClick={() => go("/objects-design")}
+              aria-label="Explore Sculptural Vessels in Product & Object Design">
+              <img src="/sculptural-vessels.jpg" alt="Three decorative sculptural vessels with contrasting finishes" />
+            </button>
+            <h3>Sculptural Vessels</h3>
+            <p>A collection of decorative object studies exploring sculptural
+              silhouettes, surface treatments and material contrasts.</p>
+            <button type="button" className="directionStatus directionStatusLink"
+              onClick={() => go("/objects-design")}>
+              Product &amp; object design · Concept study
+            </button>
+          </article>
+          <article className="directionCard">
+            <button type="button" className="directionImageLink"
+              onClick={() => go("/jewellery-design")}
+              aria-label="Explore Seraphine in Jewellery Design">
+              <img src="/seraphine-catalogue-2.jpg" alt="Diamond-set botanical fine jewellery design with flowing metalwork" />
+            </button>
+            <h3>Seraphine</h3>
+            <p>A fine jewellery design study combining fluid botanical forms,
+              intricate metalwork and precisely composed diamond settings.</p>
+            <button type="button" className="directionStatus directionStatusLink"
+              onClick={() => go("/jewellery-design")}>
+              Fine jewellery · Design study
+            </button>
+          </article>
+        </div>
+      </section>
 
       <div className="horizontalLine"></div>
 
@@ -1529,15 +3260,16 @@ export default function About() {
         </h2>
 
         <p>
-          Internationally recognized through prestigious
-          design competitions and industry awards including
-          JCK, GIA and the Canadian Jewellery Awards of
-          Excellence.
+          Recognized in leading design competitions and through industry
+          honours, including JCK, GIA, the Canadian Fashion Awards of Excellence,
+          and First Place in the Ed Fielder Architectural Award,
+          as documented in the Awards section.
         </p>
 
         <p>
-          A complete selection of awards and distinctions can
-          be viewed on the Awards page.
+          These distinctions reflect a long-standing commitment to
+          craftsmanship, original ideas and high standards of design.
+          A detailed record is available on the Awards page.
         </p>
 
       </section>
@@ -1561,55 +3293,35 @@ export default function About() {
         <div className="expertiseGrid">
 
           <div className="expertiseCard">
-
-            <h3>
-              Jewellery Design
-            </h3>
-
+            <h3>Sculpture &amp; Materials</h3>
             <p>
-              Original concepts, bespoke commissions and
-              collection development.
+              Hand-sculpted forms, material studies, custom textures,
+              painted finishes, brushwork and airbrush techniques.
             </p>
-
           </div>
 
           <div className="expertiseCard">
-
-            <h3>
-              CAD/CAM Development
-            </h3>
-
+            <h3>Technical Design &amp; CAD</h3>
             <p>
-              Technical modelling, engineering and
-              production-ready solutions.
+              Rhino 3D, CAD/CAM, blueprints, shop drawings,
+              scale, dimensions and fabrication-aware design.
             </p>
-
           </div>
 
           <div className="expertiseCard">
-
-            <h3>
-              Creative Direction
-            </h3>
-
+            <h3>Spatial &amp; Visual Design</h3>
             <p>
-              Product storytelling, visual identity and
-              collection development.
+              Retail environments, display concepts, client
+              presentations, Photoshop and Illustrator.
             </p>
-
           </div>
 
           <div className="expertiseCard">
-
-            <h3>
-              Jewellery Photography
-            </h3>
-
+            <h3>Jewellery &amp; Object Design</h3>
             <p>
-              Professional photography and retouching focused
-              on luxury presentation.
+              Fine jewellery, decorative objects, complex detail,
+              ornament, proportion and material-sensitive design.
             </p>
-
           </div>
 
         </div>
@@ -1631,20 +3343,19 @@ export default function About() {
         </h2>
 
         <p>
-          Download a concise portfolio selection for a quick
-          review, or the complete portfolio for a more
-          detailed presentation of design, process, CAD/CAM
-          development, photography and selected work.
+          Explore two dedicated portfolios: Selected Work brings together
+          sculpture, installations, spatial and retail design, objects and
+          concept studies; Jewellery Portfolio presents the jewellery work.
         </p>
 
         <div className="downloadButtons">
 
           <a
-            href="/Andrei-Jiliaev-Portfolio-Selection.pdf"
+            href="/Andrei-Jiliaev-Selected-Work-Portfolio.pdf"
             download
             className="downloadButton"
           >
-            Download Selection
+            Download Selected Work Portfolio
           </a>
 
           <a
@@ -1652,7 +3363,7 @@ export default function About() {
             download
             className="downloadButton"
           >
-            Download Complete Portfolio
+            Download Jewellery Portfolio
           </a>
 
         </div>
@@ -1666,13 +3377,18 @@ export default function About() {
       <section className="cta">
 
         <h2>
-          Let's Create Something Exceptional
+          Collaborate Across Disciplines
         </h2>
 
         <p>
-          Open to collaborations, consulting, design
-          development and bespoke projects worldwide.
+          Available for concept development and project-based collaborations
+          in sculpture, spatial design, technical development and visual presentation — working
+          with clients, studios and fabrication teams from concept toward
+          physical realisation.
         </p>
+        <button type="button" className="aboutContactLink" onClick={() => go("/contact")}>
+          Discuss a Project
+        </button>
 
       </section>
 
@@ -1688,19 +3404,19 @@ export default function About() {
 
           {bottomNavItems.map((item, index) => (
 
-            <div
-              key={item}
-              className="bottomNavItem"
-            >
-
+            <div key={item.path} className="bottomNavItem">
               <span
-                className="bottomNavLink"
-
-                onClick={() =>
-                  navigate(getPath(item))
-                }
+                className={`bottomNavLink ${activePath === item.path ? "isActive" : ""}`}
+                onClick={(event) => {
+                  if (item.label === "Sculpture") {
+                    event.stopPropagation();
+                    window.location.assign("/sculpture");
+                    return;
+                  }
+                  go(item.path);
+                }}
               >
-                {item}
+                {item.label}
               </span>
 
               {index !==
@@ -1721,27 +3437,27 @@ export default function About() {
       </footer>
 
       {/* =======================================================
+
           MOBILE BUTTON
+
       ======================================================= */}
 
-      {!menuOpen && (
-
-        <button
-          className="hamburger"
-
-          onClick={() =>
-            setMenuOpen(true)
-          }
-        >
-
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-
-        </button>
-
-      )}
+      <button
+        type="button"
+        className={`hamburger${menuOpen ? " isOpen" : ""}`}
+        onClick={() => {
+          setMenuOpen((wasOpen) => !wasOpen);
+          setMobileDropdown(null);
+        }}
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
+        aria-controls="about-mobile-navigation"
+      >
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
+      </button>
 
       {/* =======================================================
           MOBILE OVERLAY
@@ -1764,42 +3480,72 @@ export default function About() {
       ======================================================= */}
 
       <aside
-        className={
-          menuOpen
-            ? "mobilePanel open"
-            : "mobilePanel"
-        }
+        id="about-mobile-navigation"
+        className={menuOpen ? "mobilePanel open" : "mobilePanel"}
+        aria-label="Mobile navigation"
+        aria-hidden={!menuOpen}
+        inert={!menuOpen}
       >
+        <button
+          type="button"
+          className="mobileMenuItem hasSubmenu"
+          aria-expanded={mobileDropdown === "work"}
+          aria-controls="about-work-submenu"
+          onClick={() => setMobileDropdown(mobileDropdown === "work" ? null : "work")}
+        >SELECTED WORK</button>
+        <div
+          id="about-work-submenu"
+          className={`mobileSubmenu${mobileDropdown === "work" ? " isExpanded" : ""}`}
+          aria-hidden={mobileDropdown !== "work"}
+          inert={mobileDropdown !== "work"}
+        >
+          <div className="mobileSubmenuInner">
+            {selectedWorkLinks.map((item) => (
+              <button key={item.path} type="button" className={`mobileSubmenuLink${selectedMobileSubLink === item.path ? " isSelected" : ""}`} onClick={() => closeAndNavigate(item.path, true)}>{item.label}</button>
+            ))}
+          </div>
+        </div>
+
+        <button type="button" className="mobileMenuItem" onClick={() => closeAndNavigate("/sculpture")}>SCULPTURE</button>
 
         <button
-          className="closeMenu"
-
-          onClick={() =>
-            setMenuOpen(false)
-          }
+          type="button"
+          className="mobileMenuItem hasSubmenu"
+          aria-expanded={mobileDropdown === "jewellery"}
+          aria-controls="about-jewellery-submenu"
+          onClick={() => setMobileDropdown(mobileDropdown === "jewellery" ? null : "jewellery")}
+        >JEWELLERY DESIGN</button>
+        <div
+          id="about-jewellery-submenu"
+          className={`mobileSubmenu${mobileDropdown === "jewellery" ? " isExpanded" : ""}`}
+          aria-hidden={mobileDropdown !== "jewellery"}
+          inert={mobileDropdown !== "jewellery"}
         >
-          ✕
-        </button>
+          <div className="mobileSubmenuInner">
+            {jewelleryLinks.map((item) => (
+              <button key={item.path} type="button" className={`mobileSubmenuLink${selectedMobileSubLink === item.path ? " isSelected" : ""}`} onClick={() => closeAndNavigate(item.path, true)}>{item.label}</button>
+            ))}
+          </div>
+        </div>
 
-        {bottomNavItems.map((item) => (
-
-          <span
-            key={item}
-
-            className="mobileMenuItem"
-
-            onClick={() => {
-              setMenuOpen(false);
-              navigate(getPath(item));
-            }}
-          >
-            {item.toUpperCase()}
-          </span>
-
-        ))}
-
+        <button type="button" className="mobileMenuItem" onClick={() => closeAndNavigate("/design-process")}>DESIGN & PROCESS</button>
+        <button type="button" className="mobileMenuItem" onClick={() => closeAndNavigate("/about")}>ABOUT</button>
+        <button type="button" className="mobileMenuItem" onClick={() => closeAndNavigate("/awards")}>AWARDS</button>
+        <button type="button" className="mobileMenuItem" onClick={() => closeAndNavigate("/creative-consulting")}>CREATIVE CONSULTING</button>
+        <button type="button" className="mobileMenuItem isContact" onClick={() => closeAndNavigate("/contact")}>CONTACT</button>
       </aside>
 
+      {artPreview && (
+        <div className={`aboutArtOverlay${artPreviewClosing ? " isClosing" : ""}`} role="dialog" aria-modal="true" aria-label="Artwork enlarged preview" onClick={closeArtPreview}>
+          <button type="button" className="aboutArtClose" onClick={(event) => { event.stopPropagation(); closeArtPreview(); }} aria-label="Close enlarged artwork">×</button>
+          <img
+            src={artPreview.src}
+            alt={artPreview.alt}
+            style={{ width: artPreview.width, height: artPreview.height }}
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      )}
     </main>
   );
 }

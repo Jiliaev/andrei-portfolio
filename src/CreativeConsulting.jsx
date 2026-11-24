@@ -1816,11 +1816,11 @@ export default function CreativeConsulting() {
 
         }
 
-        /* The third and fourth artworks only: 85% of previously approved size. */
+        /* Third artwork (jewellery perspective) enlarged 15%; fourth artwork unchanged. */
 
         .consultingPage .carriageImage.consultingThirdImage {
 
-          width: min(559.3px, 59.13875vw);
+          width: min(643.195px, 68.0095625vw);
 
         }
 
@@ -1834,7 +1834,7 @@ export default function CreativeConsulting() {
 
           .consultingPage .carriageImage.consultingThirdImage {
 
-            width: min(527px, 58.0635vw);
+            width: min(606.05px, 66.773025vw);
 
           }
 
@@ -1850,7 +1850,7 @@ export default function CreativeConsulting() {
 
           .consultingPage .carriageImage.consultingThirdImage {
 
-            width: min(494.7px, 55.913vw);
+            width: min(568.905px, 64.29995vw);
 
           }
 
@@ -1866,7 +1866,7 @@ export default function CreativeConsulting() {
 
           .consultingPage .carriageImage.consultingThirdImage {
 
-            width: 100.98vw;
+            width: 116.127vw;
 
             position: relative;
 

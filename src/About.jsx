@@ -3201,7 +3201,7 @@ margin-top: 12px;
             <button type="button" className="directionImageLink"
               onClick={() => go("/sculpture-installations")}
               aria-label="Explore Floral Rams in Sculpture & Installations">
-              <img src="/three-rums.jpg" alt="Three floral ram sculptures arranged in a vertical composition" />
+              <img src="/about-selected-directions-floral-rams.jpg" alt="Three floral ram sculptures arranged in a vertical composition" />
             </button>
             <h3>Floral Rams</h3>
             <p>A sculptural installation concept, approximately 14 feet tall,
@@ -3216,7 +3216,7 @@ margin-top: 12px;
             <button type="button" className="directionImageLink"
               onClick={() => go("/objects-design")}
               aria-label="Explore Sculptural Vessels in Product & Object Design">
-              <img src="/sculptural-vessels.jpg" alt="Three decorative sculptural vessels with contrasting finishes" />
+              <img src="/about-selected-directions-sculptural-vessels.jpg" alt="Three decorative sculptural vessels with contrasting finishes" />
             </button>
             <h3>Sculptural Vessels</h3>
             <p>A collection of decorative object studies exploring sculptural
@@ -3311,8 +3311,8 @@ margin-top: 12px;
           <div className="expertiseCard">
             <h3>Spatial &amp; Visual Design</h3>
             <p>
-              Retail environments, display concepts, client
-              presentations, Photoshop and Illustrator.
+              Retail environments, marketing materials, web pages,
+              visual presentations and brand graphics.
             </p>
           </div>
 

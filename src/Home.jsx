@@ -1648,9 +1648,10 @@ export default function Home() {
 
           object-fit: contain;
 
-          /* Enlarge each artwork by 5% without changing the original page layout. */
+          /* Five percent smaller than the previous 1.05 scale, raised by 24px.
+             Keep the carousel stage and dot controls in their approved positions. */
 
-          transform: scale(1.05);
+          transform: translateY(-24px) scale(0.9975);
 
           transform-origin: center center;
 
@@ -1671,6 +1672,9 @@ export default function Home() {
         .carouselControls {
 
           position: relative;
+
+          /* Raise only the dot-and-arrow controls by 12px, leaving all other layout positions unchanged. */
+          transform: translateY(-12px);
 
           z-index: 2;
 

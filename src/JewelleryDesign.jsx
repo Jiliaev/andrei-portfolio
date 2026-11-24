@@ -10,13 +10,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const categories = [
 
-  { label: "Sketches & Design", path: "/sketches-design", src: "/Sketches-and-Design.jpg", alt: "PARADIS — TWIN PLUMES, colourful jewellery bird watercolour" },
+  { label: "Sketches & Design", path: "/sketches-design", src: "/Sketches-and-Design(3).jpg", alt: "PARADIS — TWIN PLUMES, colourful jewellery bird watercolour" },
 
-  { label: "Design Process", path: "/process", src: "/Jewellery-Process(3).jpg", alt: "Jewellery design process with technical line study and sculptural metal form" },
+  { label: "Design Process", path: "/process", src: "/Jewellery-Process(4).jpg", alt: "Jewellery design process with technical line study and sculptural metal form" },
 
-  { label: "Jewellery Portfolio", path: "/jewellery-photo-portfolio", src: "/Jewellery-Photo-Portfolio(1).jpg", alt: "Close-up of a green gemstone and diamond jewellery design" },
+  { label: "Jewellery Portfolio", path: "/jewellery-photo-portfolio", src: "/Jewellery-Photo-Portfolio(2).jpg", alt: "Close-up of a green gemstone and diamond jewellery design" },
 
-  { label: "Jewellery Photography", path: "/photography", src: "/Jewellery-Photography(3).jpg", alt: "Sapphire and diamond jewellery in six professional photographic views" },
+  { label: "Jewellery Photography", path: "/photography", src: "/Jewellery-Photography(4).jpg", alt: "Sapphire and diamond jewellery in six professional photographic views" },
 
 ];
 
@@ -92,7 +92,6 @@ export default function JewelleryDesign() {
   const artworkFadeTimer = useRef(null);
   const artworkNavigationLocked = useRef(false);
 
-  const [hoveredNav, setHoveredNav] = useState(null);
 
   const navigate = useNavigate();
 
@@ -4364,76 +4363,6 @@ margin-top: 12px;
           }
         }
 
-        /* EXACT APPROVED HOME / ABOUT MOBILE BRAND LOCKUP.
-           Scoped to phones only; desktop header remains untouched. */
-        @media (max-width: 720px) {
-          .homePage.jewelleryLanding .container {
-            width: 92vw;
-            padding-top: 38px;
-          }
-          .homePage.jewelleryLanding .header {
-            flex-direction: column;
-            align-items: center;
-            gap: 0;
-            margin-left: 0;
-            margin-bottom: 68px;
-            text-align: center;
-          }
-          .homePage.jewelleryLanding .homeLink {
-            flex-direction: column;
-            align-items: center;
-            gap: 0;
-          }
-          .homePage.jewelleryLanding .homeLink > .logo {
-            width: 76px;
-            height: auto;
-            max-width: none;
-            margin: 0 0 26px;
-            transform: none;
-            object-fit: contain;
-          }
-          .homePage.jewelleryLanding .homeLink > .divider,
-          .homePage.jewelleryLanding .desktopNav {
-            display: none;
-          }
-          .homePage.jewelleryLanding .brandText { text-align: center; }
-          .homePage.jewelleryLanding .name {
-            font-size: 18px;
-            letter-spacing: 0.18em;
-          }
-          .homePage.jewelleryLanding .subtitle {
-            margin-top: 8px;
-            letter-spacing: 0.26em;
-          }
-          .homePage.jewelleryLanding .subtitle p { margin: 3px 0; }
-          .homePage.jewelleryLanding .subtitle p:first-child {
-            font-size: 10px;
-            letter-spacing: 0.26em;
-          }
-          .homePage.jewelleryLanding .subtitle p:nth-child(2) {
-            font-size: 7.4px;
-            letter-spacing: 0.20em;
-          }
-        }
-
-
-
-
-        /* jewelleryLanding: approved mobile header lettering and exact two-line subtitle. */
-        @media (max-width: 720px) {
-          .homePage.jewelleryLanding .container { width: 92vw; padding-top: 38px; }
-          .homePage.jewelleryLanding .header { flex-direction: column; align-items: center; gap: 0; margin-left: 0; margin-bottom: 68px; text-align: center; }
-          .homePage.jewelleryLanding .homeLink { flex-direction: column; align-items: center; gap: 0; }
-          .homePage.jewelleryLanding .homeLink > .logo { width: 76px; height: auto; margin-bottom: 26px; }
-          .homePage.jewelleryLanding .divider, .homePage.jewelleryLanding .desktopNav { display: none; }
-          .homePage.jewelleryLanding .name { font-size: 18px; letter-spacing: .18em; }
-          .homePage.jewelleryLanding .subtitle { margin-top: 8px; letter-spacing: .26em; }
-          .homePage.jewelleryLanding .subtitle p:first-child { font-size: 10px; letter-spacing: .26em; margin: 3px 0; }
-          .homePage.jewelleryLanding .subtitle p:nth-child(2) { font-size: 7.4px; letter-spacing: .20em; margin: 3px 0; }
-          .homePage.jewelleryLanding .footerWrap { display: none; }
-        }
-      
-
         /* JEWELLERY DESIGN — targeted image, spacing and entry animation.
            Existing navigation, typography and image sources are untouched. */
         .jewelleryLanding .carouselStage {
@@ -4465,15 +4394,15 @@ margin-top: 12px;
           width: 88%;
           height: min(56.32vh, 567.6px);
         }
-        .jewelleryLanding .header { margin-bottom: calc(clamp(102px, 11vh, 140px) - 10px); }
+
         .jewelleryLanding .imagePositionSpacer { height: 16px; }
         @media (min-width: 721px) and (max-height: 900px) {
           .jewelleryLanding .carouselStage { height: 52.8vh; }
-          .jewelleryLanding .header { margin-bottom: 94px; }
+
         }
         @media (min-width: 721px) and (max-height: 760px) {
           .jewelleryLanding .carouselStage { height: 49.28vh; }
-          .jewelleryLanding .header { margin-bottom: 72px; }
+
         }
         @media (max-width: 720px) {
           .jewelleryLanding .carouselStage {
@@ -4481,7 +4410,7 @@ margin-top: 12px;
             height: auto;
             aspect-ratio: 1639 / 2048;
           }
-          .homePage.jewelleryLanding .header { margin-bottom: 58px; }
+
           .jewelleryLanding .imagePositionSpacer { height: 26px; }
           /* Mobile only: 10px more between the carousel dots and Jewellery Design text. */
           .jewelleryLanding .hero { gap: 30px; }
@@ -4559,6 +4488,384 @@ margin-top: 12px;
             transition-duration: 0ms;
           }
         }
+
+
+        /* Shared Header + Footer: exact JSX and CSS transplanted from Home.jsx (23 Nov 2026).
+           No page-specific transforms, offsets or header/footer geometry overrides. */
+/* ONE-TO-ONE COPY OF APPROVED ABOUT HEADER AND FOOTER. DO NOT RESIZE. */
+
+.homePage .container {
+
+          width: min(1680px, 88vw);
+
+          margin: 0 auto;
+
+          /* SAME POSITION AS OTHER APPROVED INTERNAL PAGES */
+
+          padding: clamp(34px, 4vh, 48px) 0 0;
+
+        }
+
+.homePage .header {
+
+          display: flex;
+
+          align-items: flex-start;
+
+          justify-content: space-between;
+
+          gap: 22px;
+
+          margin-left: clamp(100px, 7vw, 180px);
+
+          margin-bottom: clamp(102px, 11vh, 140px);
+
+          position: relative;
+
+        }
+
+.homePage .homeLink {
+
+          display: flex;
+
+          align-items: flex-start;
+
+          gap: 22px;
+
+          cursor: pointer;
+
+          color: inherit;
+
+          text-decoration: none;
+
+          -webkit-tap-highlight-color: transparent;
+
+        }
+
+.homePage .homeLink:hover {
+
+          opacity: 0.96;
+
+        }
+
+.homePage .logo {
+
+          width: 90px;
+
+          height: auto;
+
+          display: block;
+
+          object-fit: contain;
+
+          opacity: 1;
+
+        }
+
+.homePage .divider {
+
+          width: 1px;
+
+          height: 64px;
+
+          background: rgba(70, 65, 58, 0.22);
+
+          margin-top: 4px;
+
+        }
+
+.homePage .name {
+
+          margin: 0;
+
+          font-size: clamp(24px, 2vw, 34px);
+
+          font-weight: 300;
+
+          letter-spacing: 0.22em;
+
+          line-height: 1;
+
+          color: #1d1b18;
+
+        }
+
+.homePage .subtitle {
+
+          margin-top: 12px;
+
+          font-family: Arial, sans-serif;
+
+          letter-spacing: 0.28em;
+
+          color: #6f685f;
+
+        }
+
+.homePage .subtitle p {
+
+          margin: 4px 0;
+
+          font-size: clamp(10px, 0.85vw, 13px);
+
+        }
+
+.homePage .desktopNav {
+
+          display: flex;
+
+          gap: 34px;
+
+          margin-right: clamp(40px, 5vw, 120px);
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(8px, 0.8vw, 12px);
+
+          letter-spacing: 0.18em;
+
+          text-transform: uppercase;
+
+          color: #6f685f;
+
+          white-space: nowrap;
+
+        }
+
+.homePage .desktopNav span {
+
+          cursor: pointer;
+
+          transition:
+
+            color 0.45s ease,
+
+            transform 0.45s ease;
+
+        }
+
+.homePage .desktopNav span:hover {
+
+          color: #1d1b18;
+
+          transform: scale(1.04);
+
+        }
+
+.homePage .footerWrap {
+
+          width: min(1680px, 88vw);
+
+          margin: 0 auto;
+
+          padding-bottom: clamp(14px, 2vh, 28px);
+
+        }
+
+.homePage .footerLine {
+
+          width: 100%;
+
+          height: 1px;
+
+          background: rgba(0, 0, 0, 0.08);
+
+          margin-bottom: 20px;
+
+        }
+
+.homePage .bottomNav {
+
+          display: flex;
+
+          justify-content: center;
+
+          align-items: center;
+
+          flex-wrap: wrap;
+
+          gap: 0;
+
+          padding-bottom: 5px;
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(8px, 0.8vw, 12px);
+
+          letter-spacing: 0.18em;
+
+          text-transform: uppercase;
+
+          color: #6f685f;
+
+        }
+
+.homePage .bottomNavItem {
+
+          display: flex;
+
+          align-items: center;
+
+        }
+
+.homePage .bottomNavLink {
+
+          cursor: pointer;
+
+          white-space: nowrap;
+
+          transition:
+
+            color 0.45s ease,
+
+            transform 0.45s ease;
+
+        }
+
+.homePage .bottomNavLink:hover {
+
+          color: #1d1b18;
+
+          transform: scale(1.08);
+
+        }
+
+.homePage .navDivider {
+
+          width: 1px;
+
+          height: clamp(10px, 0.9vw, 14px);
+
+          background:
+
+            rgba(111, 104, 95, 0.25);
+
+          margin-left:
+
+            clamp(4px, 0.7vw, 12px);
+
+          margin-right:
+
+            clamp(4px, 0.7vw, 12px);
+
+        }
+
+.homePage .copyright {
+
+          margin-top: 12px;
+
+          text-align: center;
+
+          font-family: Arial, sans-serif;
+
+          font-size: clamp(7px, 0.55vw, 9px);
+
+          letter-spacing: 0.28em;
+
+          text-transform: uppercase;
+
+          color: #b9b2a8;
+
+        }
+
+@media (min-width:721px) {
+
+  .homePage .homeLink > .logo { width:auto; height:calc(var(--brand-text-height, 86px) - 8px); max-width:none; flex-shrink:0; align-self:center; object-fit:contain; margin:0; transform:none; }
+
+  .homePage .homeLink > .divider { height:calc(var(--brand-text-height, 86px) - 20px); align-self:center; margin-top:0; flex-shrink:0; }
+
+}
+
+@media (min-width:721px) and (max-height:900px) {
+
+  .homePage .container {padding-top:38px;}
+
+  .homePage .header {margin-bottom:104px;}
+
+  .homePage .footerLine {margin-bottom:16px;}
+
+  .homePage .copyright {margin-top:9px;}
+
+  .homePage .footerWrap {padding-bottom:12px;}
+
+}
+
+@media (min-width:721px) and (max-height:760px) {
+
+  .homePage .container {padding-top:28px;}
+
+  .homePage .header {margin-bottom:82px;}
+
+}
+
+@media (max-width:720px) {
+
+  .homePage .container {width:92vw;padding-top:38px;}
+
+  .homePage .header {flex-direction:column;align-items:center;gap:0;margin-left:0;margin-bottom:68px;text-align:center;}
+
+  .homePage .homeLink {flex-direction:column;align-items:center;gap:0;}
+
+  .homePage .logo {width:76px;height:auto;margin-bottom:26px;}
+
+  .homePage .divider, .homePage .desktopNav {display:none;}
+
+  .homePage .name {font-size:18px;letter-spacing:.18em;}
+
+  .homePage .subtitle {margin-top:8px;letter-spacing:.26em;}
+
+  .homePage .subtitle p {font-size:8px;margin:3px 0;}
+
+  .homePage .footerWrap {display:none;}
+
+}
+
+/* Only the active link receives the approved 8% enlargement. */
+
+.homePage .desktopNav .navText.isCurrent,.homePage .desktopNav .navCurrent,.homePage .bottomNavLink.isActive { color:#9C8664 !important; transform:scale(1.08); transform-origin:center; }
+
+.homePage .footerWrap {margin-left:auto;margin-right:auto;}
+
+
+        /* Mobile brand typography copied literally from the current Home.jsx.
+           These rules target only the two subtitle lines; carousel untouched. */
+        @media (max-width: 720px) {
+          .homePage .subtitle p:first-child {
+            font-size: 10px;
+            letter-spacing: 0.26em;
+          }
+          .homePage .subtitle p:nth-child(2) {
+            font-size: 7.4px;
+            letter-spacing: 0.20em;
+          }
+        }
+
+        /* Requested adjustment: move the complete upper header 8px left in total (additional 1px). */
+        .homePage.jewelleryLanding > .container > .header {
+          transform: translateX(-8px);
+        }
+
+        /* Desktop only: move the complete upper header 4px further right.
+           Mobile header, hero content and footer remain unchanged. */
+        @media (min-width: 721px) {
+          .homePage.jewelleryLanding > .container > .header {
+            transform: translateX(0px);
+          }
+        }
+
+        /* Desktop only: central content 7px higher than the previous 23px offset.
+           Header and entire footer remain exactly where they were; mobile unchanged. */
+        @media (min-width: 721px) {
+          .homePage.jewelleryLanding > .hero {
+            position: relative;
+            top: 16px;
+          }
+          .homePage.jewelleryLanding > .footerWrap {
+            position: relative;
+            top: 22px;
+          }
+        }
+
 `}</style>
 
 
@@ -4573,11 +4880,7 @@ margin-top: 12px;
 
       <div className="container">
 
-
-
         <header className="header">
-
-
 
           <div
 
@@ -4589,8 +4892,6 @@ margin-top: 12px;
 
           >
 
-
-
             <img
 
               src="/ja-logo-gold.png"
@@ -4601,23 +4902,15 @@ margin-top: 12px;
 
             />
 
-
-
             <div className="divider"></div>
 
-
-
             <div className="brandText" ref={brandTextRef}>
-
-
 
               <h1 className="name">
 
                 ANDREI JILIAEV
 
               </h1>
-
-
 
               <div className="subtitle">
 
@@ -4627,91 +4920,59 @@ margin-top: 12px;
 
               </div>
 
-
-
             </div>
-
-
 
           </div>
 
+          <nav className="desktopNav" aria-label="Main navigation" onMouseLeave={() => setDesktopDropdown(null)}>
 
+            <div className={`navItem ${desktopDropdown === "work" ? "navOpen" : ""}`} onMouseEnter={() => setDesktopDropdown("work")}>
 
-          <nav className="desktopNav" aria-label="Main navigation" onMouseLeave={() => { setDesktopDropdown(null); setHoveredNav(null); }}>
-
-            <div className={`navItem ${desktopDropdown === "work" ? "navOpen" : ""}`} onMouseEnter={() => { setDesktopDropdown("work"); setHoveredNav("work"); }} onFocusCapture={() => { setDesktopDropdown("work"); setHoveredNav("work"); }}>
-
-              <span className={`navText ${activePath === "/work" ? "isCurrent" : ""}`} role="link" tabIndex={0} aria-haspopup="true"
+              <span className={`navText ${activePath === "/work" ? "isCurrent" : ""}`} role="button" tabIndex={0} aria-haspopup="true"
 
                 aria-expanded={desktopDropdown === "work"}
 
                 onClick={() => closeAndNavigate("/work")}
 
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); closeAndNavigate("/work"); } }}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") {e.preventDefault();closeAndNavigate("/work");} }}
 
               >Selected Work</span>
 
-              <div className="navDropdownPanel">
-
-                <div className="navDropdownInner">
-
-                  {selectedWorkLinks.map((item) => (
-
-                    <button key={item.path} type="button" className="navDropdownLink" onClick={() => closeAndNavigate(item.path)}>
-
-                      {item.label}
-
-                    </button>
-
-                  ))}
-
-                </div>
-
-              </div>
-
-            </div>
-
-            <div className={`navItem ${desktopDropdown === "jewellery" ? "navOpen" : ""}`}
-
-              onMouseEnter={() => { setDesktopDropdown("jewellery"); setHoveredNav("jewellery"); }}
-
-              onFocusCapture={() => { setDesktopDropdown("jewellery"); setHoveredNav("jewellery"); }}>
-
-              <span className={`navText ${hoveredNav === null || hoveredNav === "jewellery" ? "jewelleryCurrentNav" : ""}`}
-
-                role="link" tabIndex={0} aria-current="page" aria-haspopup="true"
-
-                aria-expanded={desktopDropdown === "jewellery"}
-
-                onClick={() => closeAndNavigate("/jewellery-design")}
-
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); closeAndNavigate("/jewellery-design"); } }}
-
-              >Jewellery Design</span>
-
               <div className="navDropdownPanel"><div className="navDropdownInner">
 
-                {jewelleryLinks.map((item) => (
-
-                  <button key={item.path} type="button" className="navDropdownLink" onClick={() => closeAndNavigate(item.path)}>{item.label}</button>
-
-                ))}
+                {selectedWorkLinks.map((item) => <button key={item.path} type="button" className="navDropdownLink" onClick={() => closeAndNavigate(item.path)}>{item.label}</button>)}
 
               </div></div>
 
             </div>
 
-            <span className={activePath === "/about" ? "navCurrent" : ""} role="link" tabIndex={0} onMouseEnter={() => setHoveredNav("about")} onFocus={() => setHoveredNav("about")} onClick={() => navigate("/about")} onKeyDown={(e) => e.key === "Enter" && navigate("/about")}>About</span>
+            <div className={`navItem ${desktopDropdown === "jewellery" ? "navOpen" : ""}`} onMouseEnter={() => setDesktopDropdown("jewellery")}>
 
-            <span className={activePath === "/contact" ? "navCurrent" : ""} role="link" tabIndex={0} onMouseEnter={() => setHoveredNav("contact")} onFocus={() => setHoveredNav("contact")} onClick={() => navigate("/contact")} onKeyDown={(e) => e.key === "Enter" && navigate("/contact")}>Contact</span>
+              <span className={`navText ${activePath === "/jewellery-design" ? "isCurrent" : ""}`} role="button" tabIndex={0} aria-haspopup="true"
+
+                aria-expanded={desktopDropdown === "jewellery"}
+
+                onClick={() => closeAndNavigate("/jewellery-design")}
+
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") {e.preventDefault();closeAndNavigate("/jewellery-design");} }}
+
+              >Jewellery Design</span>
+
+              <div className="navDropdownPanel"><div className="navDropdownInner">
+
+                {jewelleryLinks.map((item) => <button key={item.path} type="button" className="navDropdownLink" onClick={() => closeAndNavigate(item.path)}>{item.label}</button>)}
+
+              </div></div>
+
+            </div>
+
+            <span className={activePath === "/about" ? "navCurrent" : ""} role="link" tabIndex={0} onClick={() => closeAndNavigate("/about")} onKeyDown={(e) => e.key === "Enter" && closeAndNavigate("/about")}>About</span>
+
+            <span className={activePath === "/contact" ? "navCurrent" : ""} role="link" tabIndex={0} onClick={() => closeAndNavigate("/contact")} onKeyDown={(e) => e.key === "Enter" && closeAndNavigate("/contact")}>Contact</span>
 
           </nav>
 
-
-
         </header>
-
-
 
       </div>
 
@@ -4891,93 +5152,39 @@ margin-top: 12px;
 
       <footer className="footerWrap">
 
-
-
         <div className="footerLine"></div>
 
+        <div className="bottomNav">
 
+          {bottomNavItems.map((item, index) => (
 
-        <div className="bottomNav" onMouseLeave={() => setHoveredNav(null)}>
+            <div key={item.path} className="bottomNavItem">
 
+              <span className={`bottomNavLink ${activePath === item.path ? "isActive" : ""}`} onClick={() => closeAndNavigate(item.path)}>
 
+                {item.label}
 
-          {bottomNavItems.map(
+              </span>
 
-            (item, index) => (
+              {index !==
 
+                bottomNavItems.length - 1 && (
 
+                  <div className="navDivider"></div>
 
-              <div
+                )}
 
-                key={item.path}
+            </div>
 
-                className="bottomNavItem"
-
-              >
-
-
-
-                <span
-
-                  className={`bottomNavLink ${activePath === item.path ? "isActive" : ""}`}
-
-                  aria-current={activePath === item.path ? "page" : undefined}
-
-                  onMouseEnter={() => setHoveredNav(item.path === "/jewellery-design" ? "jewellery" : item.path)}
-
-                  onFocus={() => setHoveredNav(item.path === "/jewellery-design" ? "jewellery" : item.path)}
-
-
-
-                  onClick={() =>
-
-                    navigate(
-
-                      item.path
-
-                    )
-
-                  }
-
-                >
-
-                  {item.label}
-
-                </span>
-
-
-
-                {index !==
-
-                  bottomNavItems.length - 1 && (
-
-                    <div className="navDivider"></div>
-
-                  )}
-
-
-
-              </div>
-
-
-
-            )
-
-          )}
-
-
+          ))}
 
         </div>
-
-
 
         <div className="copyright">
 
           © ANDREI JILIAEV 2026
 
         </div>
-
-
 
       </footer>
 

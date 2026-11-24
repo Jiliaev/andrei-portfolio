@@ -2493,6 +2493,21 @@ margin-top: 12px;
 .designCreationPage button.dcHeroLabel:focus-visible {
   outline:1px solid #9C8664; outline-offset:2px;
 }
+/* Keep LIGHT / fixed; reserve the same status column for ON and OFF.
+   The button's width therefore never changes when the light is toggled,
+   on desktop or mobile (including while hovered/focused). */
+.designCreationPage button.dcHeroLabel {
+  display:inline-flex;
+  align-items:center;
+  gap:.75em;
+  white-space:nowrap;
+}
+.designCreationPage .dcHeroLabelPrefix { flex:0 0 auto; }
+.designCreationPage .dcHeroLabelState {
+  display:inline-block;
+  flex:0 0 4em;
+  text-align:left;
+}
 
 .designCreationPage .dcArc { display:none; } /* Retire only the old ellipse stroke: the exact approved gradient contour is drawn as the line below. */
 /* The tonal wash follows the actual ORIGINAL CSS elliptical arc.
@@ -3589,6 +3604,24 @@ margin-top: 12px;
           }
         }
 
+        /* DESKTOP ONLY — upper hero light switch: 15% larger, fully opaque.
+           Keep the mobile switch and every existing position/animation unchanged. */
+        @media (min-width: 721px) {
+          .designCreationPage .dcScrollPill {
+            background-color: #ffffff;
+            transform: translateY(5px) scale(1.15);
+            transform-origin: center center;
+          }
+        }
+
+        /* MOBILE ONLY — make the hero switch fully opaque.
+           Keep its approved size, position, and interaction untouched. */
+        @media (max-width: 720px) {
+          .designCreationPage .dcScrollPill {
+            background-color: #ffffff;
+          }
+        }
+
         /* Consistent approved Sculpture submenu selection feedback on phones. */
         @media (max-width: 720px) {
           .designCreationPage .mobileSubmenu.isExpanded .mobileSubmenuLink.isSelected {
@@ -3704,7 +3737,8 @@ margin-top: 12px;
             <button className="dcHeroLabel" type="button" onClick={toggleHeroLight}
               aria-label={lightIsOn ? 'LIGHT ON — click to turn off' : 'LIGHT OFF — click to turn on'}
               aria-pressed={lightIsOn}>
-              {lightIsOn ? 'LIGHT / ON' : 'LIGHT / OFF'}
+              <span className="dcHeroLabelPrefix" aria-hidden="true">LIGHT /</span>
+              <span className="dcHeroLabelState" aria-hidden="true">{lightIsOn ? 'ON' : 'OFF'}</span>
             </button>
           </div>
           <div className="dcArc" aria-hidden="true" />

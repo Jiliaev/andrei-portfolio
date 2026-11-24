@@ -2996,6 +2996,20 @@ margin-top: 12px;
           .awardsPage .jewelleryExploreButton,
           .awardsPage .jewelleryExploreButton .jewelleryExploreArrow { transition: none; }
         }
+
+        /* DESKTOP ONLY — extra 24px between each introductory paragraph
+           and the photograph with its accompanying copy; retain their alignment. */
+        @media (min-width: 721px) {
+          .awardsPage .topIntro { margin-bottom: 82px; } /* 58px + 24px */
+          .awardsPage .familyAwardHeading { margin-bottom: 74px; } /* 50px + 24px */
+          /* Same 120px space below the preceding rule as the Recognition heading. */
+          .awardsPage .familyAward { margin-top: 120px; }
+        }
+        /* MOBILE ONLY — match 2016 spacing to Recognition's 78px rule-to-label gap. */
+        @media (max-width: 720px) {
+          .awardsPage .familyAward { margin-top: 78px; }
+        }
+
 `}</style>
 
       <div className="container">

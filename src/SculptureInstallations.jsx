@@ -233,9 +233,7 @@ export default function SculptureInstallations() {
       setFeaturedFishIndex(index);
       return;
     }
-    // The featured fish can be opened in the same lightbox as other artwork.
-    // Keep desktop fish interaction unchanged; this additional tap is mobile-only.
-    if (!window.matchMedia("(max-width: 720px)").matches) return;
+    // The featured fish opens in the existing gallery lightbox on desktop and mobile.
     const preview = event.currentTarget.querySelector("img");
     setLightboxImage({
       ...image,
@@ -2680,15 +2678,8 @@ margin-top: 12px;
         }
         .sculptureProjectFish .fishDuo .fishSelectButton.isFeatured {
           width: 100%;
-          pointer-events: none;
-          cursor: default;
-        }
-        /* Featured fish stays selectable on phones; desktop behaviour is preserved. */
-        @media (max-width: 720px) {
-          .sculptureProjectFish .fishDuo .fishSelectButton.isFeatured {
-            pointer-events: auto;
-            cursor: zoom-in;
-          }
+          pointer-events: auto;
+          cursor: pointer;
         }
         .sculptureProjectFish .fishDuo .fishSelectButton:disabled { opacity: 1; }
         @media (hover:hover) and (pointer:fine) {
@@ -3949,7 +3940,7 @@ margin-top: 12px;
                       type="button"
                       className={`fishSelectButton ${featuredFishIndex === imageIndex ? "isFeatured" : "isSecondary"}`}
                       onClick={(event) => selectFishPhoto(imageIndex, img, event)}
-                      aria-label={featuredFishIndex === imageIndex ? `Enlarge ${img.title} on mobile` : `Feature ${img.title}`}
+                      aria-label={featuredFishIndex === imageIndex ? `Enlarge ${img.title}` : `Feature ${img.title}`}
                       title={featuredFishIndex === imageIndex ? `Enlarge ${img.title}` : `Show ${img.title}`}
                     >
                       <img src={img.src} alt={img.caption} loading="lazy" draggable={false} />

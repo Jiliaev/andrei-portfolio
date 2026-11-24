@@ -2469,6 +2469,13 @@ margin-top: 12px;
           width: min(470px, 62%);
           margin: 0 auto;
         }
+        /* Desktop only: first, centered Luxury Retail hero image 15% smaller.
+           Other project heroes, mobile sizing and the gallery remain unchanged. */
+        @media (min-width: 721px) {
+          #luxury-retail .retailLuxuryHeroBlock > .retailFigure {
+            width: min(399.5px, 52.7%);
+          }
+        }
         .retailLuxuryNote {
           max-width: 625px;
           margin: 25px auto 0;

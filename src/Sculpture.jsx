@@ -318,14 +318,39 @@ export default function Sculpture() {
   // Lunar Blossom Rams: animate BOTH ends of the swap inside fixed-size frames.
   // Keep the previous images mounted until their CSS crossfade has finished.
   // The hero opens the shared lightbox; no full-resolution link or download control.
+  // Desktop-only Rams slideshow. Pauses when someone interacts with the gallery,
+  // when it leaves the screen, or when the browser tab is hidden.
+  const ramsGalleryViewportRef = useRef(null);
+  const ramsHasAutoplayAdvanced = useRef(false);
+  const [ramsAutoPaused, setRamsAutoPaused] = useState(false);
+  const [ramsInView, setRamsInView] = useState(false);
+  const [ramsTabVisible, setRamsTabVisible] = useState(() => !document.hidden);
+  useEffect(() => {
+    const section = ramsGalleryViewportRef.current;
+    if (!section || typeof IntersectionObserver === "undefined") {
+      setRamsInView(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      setRamsInView(entry.isIntersecting);
+    }, { threshold: 0.15 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    const updateVisibility = () => setRamsTabVisible(!document.hidden);
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
   const [ramsGallery, setRamsGallery] = useState(() => ({
     photos: sculptureProjects[0].images,
     outgoingHero: null,
     outgoingThumb: null,
     changedSlot: null,
     transitionId: 0,
+    autoSelectedSlot: null,
   }));
-  const swapRamsPhoto = (thumbnailIndex) => {
+  const swapRamsPhoto = (thumbnailIndex, automatic = false) => {
     setRamsGallery((current) => {
       if (thumbnailIndex < 1 || thumbnailIndex >= current.photos.length) return current;
       const nextPhotos = [...current.photos];
@@ -336,12 +361,30 @@ export default function Sculpture() {
         outgoingThumb: current.photos[thumbnailIndex],
         changedSlot: thumbnailIndex,
         transitionId: current.transitionId + 1,
+        autoSelectedSlot: automatic ? thumbnailIndex : null,
       };
     });
   };
+  // Advance through the eight original photos, regardless of thumbnail swaps.
+  // A new timer starts after each manual or automatic selection.
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 721px) and (hover: hover) and (pointer: fine)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!desktop.matches || reducedMotion.matches || ramsAutoPaused || !ramsInView || !ramsTabVisible || sculptureLightboxImage) return undefined;
+    const delay = ramsHasAutoplayAdvanced.current ? 3200 : 2500;
+    const timer = window.setTimeout(() => {
+      ramsHasAutoplayAdvanced.current = true;
+      const original = sculptureProjects[0].images;
+      const position = original.findIndex((photo) => photo.src === ramsGallery.photos[0].src);
+      const next = original[(position + 1) % original.length];
+      const slot = ramsGallery.photos.findIndex((photo) => photo.src === next.src);
+      if (slot > 0) swapRamsPhoto(slot, true);
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [ramsGallery.photos, ramsAutoPaused, ramsInView, ramsTabVisible, sculptureLightboxImage]);
   const finishRamsSwap = (transitionId) => {
     setRamsGallery((current) => current.transitionId === transitionId
-      ? { ...current, outgoingHero: null, outgoingThumb: null, changedSlot: null }
+      ? { ...current, outgoingHero: null, outgoingThumb: null, changedSlot: null, autoSelectedSlot: null }
       : current);
   };
   const handleSculptureImageError = (event, src) => {
@@ -2931,6 +2974,26 @@ margin-top: 12px;
           from { opacity: 1; }
           to { opacity: 0; }
         }
+        /* Automatic Rams slideshow: desktop only. Preserve the existing
+           fixed-size hero and crossfade; make the incoming photo breathe gently
+           and briefly enlarge the thumbnail from which it was selected. */
+        @media (min-width: 721px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+          .sculpturePage .sculptureRamsHero .sculptureRamsHeroAutoIncoming {
+            animation: sculptureRamsAutoHeroBreathe 1.5s cubic-bezier(.22, 1, .36, 1) both;
+          }
+          .sculpturePage .sculptureRamsThumb .sculptureRamsAutoSelectedThumb {
+            animation: sculptureRamsAutoThumbSelected 1.5s ease-in-out both;
+          }
+        }
+        @keyframes sculptureRamsAutoHeroBreathe {
+          0% { transform: scale(1.025); }
+          100% { transform: scale(1); }
+        }
+        @keyframes sculptureRamsAutoThumbSelected {
+          0% { opacity: 1; transform: scale(1); }
+          30% { opacity: .92; transform: scale(1.065); }
+          100% { opacity: 0; transform: scale(1); }
+        }
         .sculpturePage .sculptureRamsThumbnails {
           width: min(810px, 100%);
           display: grid;
@@ -4123,7 +4186,16 @@ margin-top: 12px;
               )}
             </div>
             {project.id === "lunar-blossom-rams" ? (
-              <div className="sculptureImages sculptureImages--rams">
+              <div
+                ref={ramsGalleryViewportRef}
+                className="sculptureImages sculptureImages--rams"
+                onMouseEnter={() => setRamsAutoPaused(true)}
+                onMouseLeave={() => setRamsAutoPaused(false)}
+                onFocusCapture={() => setRamsAutoPaused(true)}
+                onBlurCapture={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget)) setRamsAutoPaused(false);
+                }}
+              >
                 <figure
                   className="sculptureFigure sculptureRamsHero"
                   aria-live="polite"
@@ -4140,7 +4212,7 @@ margin-top: 12px;
                   }}
                 >
                   <img
-                    className="sculptureRamsHeroImage"
+                    className={`sculptureRamsHeroImage${ramsGallery.autoSelectedSlot !== null ? " sculptureRamsHeroAutoIncoming" : ""}`}
                     src={ramsGallery.photos[0].src}
                     alt={ramsGallery.photos[0].alt}
                     loading="eager"
@@ -4183,7 +4255,7 @@ margin-top: 12px;
                       {ramsGallery.changedSlot === index + 1 && ramsGallery.outgoingThumb && (
                         <img
                           key={`rams-thumb-out-${ramsGallery.transitionId}`}
-                          className="sculptureRamsThumbImage sculptureRamsThumbOutgoing"
+                          className={`sculptureRamsThumbImage sculptureRamsThumbOutgoing${ramsGallery.autoSelectedSlot === index + 1 ? " sculptureRamsAutoSelectedThumb" : ""}`}
                           src={ramsGallery.outgoingThumb.src}
                           alt=""
                           aria-hidden="true"

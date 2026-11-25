@@ -150,14 +150,14 @@ export default function SiteSignature() {
       <div
         className={`siteDesignerSignature${hasScrolled ? " isVisible" : ""}`}
         role="img"
-        aria-label="Andrei Jiliaev — Designer, Sculptor and Artist"
+        aria-label="Andrei Jiliaev — Creative Designer, Sculptor and Artist"
       >
         <span className="siteDesignerSignatureMonogramBlock" aria-hidden="true">
           <span className="siteDesignerSignatureMonogram">AJ</span>
           <span className="siteDesignerSignatureRule" />
         </span>
         <span className="siteDesignerSignatureName" aria-hidden="true">ANDREI JILIAEV</span>
-        <span className="siteDesignerSignatureRole" aria-hidden="true">DESIGNER · SCULPTOR · ARTIST</span>
+        <span className="siteDesignerSignatureRole" aria-hidden="true">CREATIVE DESIGNER · SCULPTOR · ARTIST</span>
       </div>
     </>
   );

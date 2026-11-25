@@ -4840,16 +4840,37 @@ margin-top: 12px;
           }
         }
 
-        /* Requested adjustment: move the complete upper header 8px left in total (additional 1px). */
-        .homePage.jewelleryLanding > .container > .header {
-          transform: translateX(-8px);
+        /* MOBILE ONLY: preserve the previously approved 8px adjustment. */
+        @media (max-width: 720px) {
+          .homePage.jewelleryLanding > .container > .header {
+            transform: translateX(-8px);
+          }
         }
 
-        /* Desktop only: move the complete upper header 4px further right.
-           Mobile header, hero content and footer remain unchanged. */
+        /* DESKTOP: match the Home.jsx header/footer horizontal geometry.
+           Remove page-specific header translation; the 88vw outer frame,
+           responsive header inset and footer centering are identical to Home.
+           Do not alter hero placement or the approved footer vertical offset. */
         @media (min-width: 721px) {
+          .homePage.jewelleryLanding > .container {
+            width: min(1680px, 88vw);
+            margin-left: auto;
+            margin-right: auto;
+          }
           .homePage.jewelleryLanding > .container > .header {
-            transform: translateX(0px);
+            margin-left: clamp(100px, 7vw, 180px);
+            margin-right: 0;
+            left: auto;
+            right: auto;
+            transform: none;
+          }
+          .homePage.jewelleryLanding > .footerWrap {
+            width: min(1680px, 88vw);
+            margin-left: auto;
+            margin-right: auto;
+            left: auto;
+            right: auto;
+            transform: none;
           }
         }
 

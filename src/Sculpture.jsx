@@ -31,7 +31,7 @@ const jewelleryLinks = [
 // SCULPTURE — 11 independent projects / 17 web-resolution JPGs.
 // Place renamed images directly in: public/
 // The original files 1.jpg ... 13.jpg plus three new descriptively named images.
-// The five Rams previews swap images; Floral Lips and Fish Studies use active / inactive size swaps.
+// The seven Rams previews swap images; Floral Lips and Fish Studies use active / inactive size swaps.
 // Clicking an already-featured Floral Lips or Fish image uses the same approved
 // lightbox as the other zoomable sculptures, on desktop and mobile.
 // Other selected sculptures retain their 1.2% hover / 15% centered lightbox
@@ -51,6 +51,8 @@ const sculptureProjects = [
       { src: "/14-lunar-blossom-rams-golden-family.jpg", alt: "Three golden floral rams beneath a soft pink ribbon and blossoming tree", ratio: 2048 / 1513 },
       { src: "/15-lunar-blossom-rams-golden-ram.jpg", alt: "Golden ram sculpture with a sweeping red and gold ribbon", ratio: 1639 / 2048 },
       { src: "/16-lunar-blossom-rams-floral-pair.jpg", alt: "Two floral rams beside a golden flowering tree and red ribbon", ratio: 1639 / 2048 },
+      { src: "/17-lunar-blossom-rams-single.jpg", alt: "Ivory ram surrounded by red flowers and ornamented ribbons", ratio: 1453 / 1300 },
+      { src: "/18-lunar-blossom-rams-three-rams.jpg", alt: "Three colorful rams in a floral spiral sculpture", ratio: 1453 / 1300 },
     ],
   },
   {
@@ -315,7 +317,7 @@ export default function Sculpture() {
   }, [sculptureLightboxImage]);
   // Lunar Blossom Rams: animate BOTH ends of the swap inside fixed-size frames.
   // Keep the previous images mounted until their CSS crossfade has finished.
-  // No lightbox, full-resolution link, or downloadable image control.
+  // The hero opens the shared lightbox; no full-resolution link or download control.
   const [ramsGallery, setRamsGallery] = useState(() => ({
     photos: sculptureProjects[0].images,
     outgoingHero: null,
@@ -2881,7 +2883,7 @@ margin-top: 12px;
           outline: 2px solid #9C8664;
           outline-offset: 5px;
         }
-        /* Lunar Blossom Rams: keep ONE fixed hero canvas for all six photos.
+        /* Lunar Blossom Rams: keep ONE fixed hero canvas for all eight photos.
            Portrait and landscape JPGs have different source aspect ratios;
            never let a click change the display frame dimensions. */
         .sculpturePage .sculptureImages--rams {
@@ -2903,6 +2905,11 @@ margin-top: 12px;
           position: relative;
           aspect-ratio: 1 / 1;
           overflow: hidden;
+          cursor: pointer;
+        }
+        .sculpturePage .sculptureRamsHero:focus-visible {
+          outline: 2px solid #9C8664;
+          outline-offset: 5px;
         }
         .sculpturePage .sculptureRamsHero .sculptureRamsHeroImage {
           position: absolute;
@@ -2927,7 +2934,7 @@ margin-top: 12px;
         .sculpturePage .sculptureRamsThumbnails {
           width: min(810px, 100%);
           display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
+          grid-template-columns: repeat(7, minmax(0, 1fr));
           align-items: center;
           justify-items: center;
           gap: 18px;
@@ -4120,6 +4127,17 @@ margin-top: 12px;
                 <figure
                   className="sculptureFigure sculptureRamsHero"
                   aria-live="polite"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Enlarge ${ramsGallery.photos[0].alt}`}
+                  title="Click to enlarge image"
+                  onClick={(event) => openSculptureLightbox(event, project, ramsGallery.photos[0])}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      openSculptureLightbox(event, project, ramsGallery.photos[0]);
+                    }
+                  }}
                 >
                   <img
                     className="sculptureRamsHeroImage"
@@ -4157,7 +4175,7 @@ margin-top: 12px;
                         className="sculptureRamsThumbImage"
                         src={photo.src}
                         alt={photo.alt}
-                        loading="lazy"
+                        loading="eager"
                         decoding="async"
                         draggable={false}
                         onError={(event) => handleSculptureImageError(event, photo.src)}

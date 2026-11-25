@@ -342,6 +342,23 @@ export default function Sculpture() {
     document.addEventListener("visibilitychange", updateVisibility);
     return () => document.removeEventListener("visibilitychange", updateVisibility);
   }, []);
+  // Warm all eight original Rams assets once, regardless of whether a thumbnail
+  // has been hovered or selected. The browser can then paint every preview as
+  // soon as the gallery appears and reuse the cached decoded image on swaps.
+  useEffect(() => {
+    const previews = sculptureProjects[0].images.map((photo) => {
+      const preview = new window.Image();
+      preview.decoding = "async";
+      preview.loading = "eager";
+      preview.src = photo.src;
+      if (typeof preview.decode === "function") {
+        preview.decode().catch(() => {});
+      }
+      return preview;
+    });
+    // Keep the Image instances referenced for the lifetime of this effect.
+    return () => { previews.length = 0; };
+  }, []);
   const [ramsGallery, setRamsGallery] = useState(() => ({
     photos: sculptureProjects[0].images,
     outgoingHero: null,

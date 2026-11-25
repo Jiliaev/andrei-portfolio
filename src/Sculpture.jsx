@@ -318,7 +318,7 @@ export default function Sculpture() {
   // Lunar Blossom Rams: animate BOTH ends of the swap inside fixed-size frames.
   // Keep the previous images mounted until their CSS crossfade has finished.
   // The hero opens the shared lightbox; no full-resolution link or download control.
-  // Desktop-only Rams slideshow. Pauses when someone interacts with the gallery,
+  // Responsive Rams slideshow. Pauses when someone interacts with the gallery,
   // when it leaves the screen, or when the browser tab is hidden.
   const ramsGalleryViewportRef = useRef(null);
   const ramsHasAutoplayAdvanced = useRef(false);
@@ -368,9 +368,8 @@ export default function Sculpture() {
   // Advance through the eight original photos, regardless of thumbnail swaps.
   // A new timer starts after each manual or automatic selection.
   useEffect(() => {
-    const desktop = window.matchMedia("(min-width: 721px) and (hover: hover) and (pointer: fine)");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (!desktop.matches || reducedMotion.matches || ramsAutoPaused || !ramsInView || !ramsTabVisible || sculptureLightboxImage) return undefined;
+    if (reducedMotion.matches || ramsAutoPaused || !ramsInView || !ramsTabVisible || sculptureLightboxImage || menuOpen) return undefined;
     const delay = ramsHasAutoplayAdvanced.current ? 3200 : 2500;
     const timer = window.setTimeout(() => {
       ramsHasAutoplayAdvanced.current = true;
@@ -381,7 +380,7 @@ export default function Sculpture() {
       if (slot > 0) swapRamsPhoto(slot, true);
     }, delay);
     return () => window.clearTimeout(timer);
-  }, [ramsGallery.photos, ramsAutoPaused, ramsInView, ramsTabVisible, sculptureLightboxImage]);
+  }, [ramsGallery.photos, ramsAutoPaused, ramsInView, ramsTabVisible, sculptureLightboxImage, menuOpen]);
   const finishRamsSwap = (transitionId) => {
     setRamsGallery((current) => current.transitionId === transitionId
       ? { ...current, outgoingHero: null, outgoingThumb: null, changedSlot: null, autoSelectedSlot: null }
@@ -2974,10 +2973,10 @@ margin-top: 12px;
           from { opacity: 1; }
           to { opacity: 0; }
         }
-        /* Automatic Rams slideshow: desktop only. Preserve the existing
+        /* Automatic Rams slideshow: desktop and mobile. Preserve the existing
            fixed-size hero and crossfade; make the incoming photo breathe gently
            and briefly enlarge the thumbnail from which it was selected. */
-        @media (min-width: 721px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+        @media (prefers-reduced-motion: no-preference) {
           .sculpturePage .sculptureRamsHero .sculptureRamsHeroAutoIncoming {
             animation: sculptureRamsAutoHeroBreathe 1.5s cubic-bezier(.22, 1, .36, 1) both;
           }

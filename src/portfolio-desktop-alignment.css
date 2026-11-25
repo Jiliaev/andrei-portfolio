@@ -1,0 +1,11 @@
+/* Portfolio desktop alignment — one consistent layout viewport across routes.
+   Loaded globally once (e.g. from src/main.jsx).
+   Desktop only; preserve all mobile layout rules at <=720px.
+   This addresses differences caused by pages with/without reserved scrollbar width.
+*/
+@media (min-width: 721px) {
+  html {
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+  }
+}

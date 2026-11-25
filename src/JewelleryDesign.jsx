@@ -4887,6 +4887,54 @@ margin-top: 12px;
           }
         }
 
+
+        /* =========================================================
+           DESKTOP GEOMETRY — MATCH SELECTED WORK LANDING
+           Reference: SelectedWork.jsx supplied 2026-11-25.
+           Applies to desktop only. No mobile, artwork, or navigation
+           behavior changes. All content uses identical hero grid frame.
+           ========================================================= */
+        @media (min-width: 721px) {
+          .homePage.jewelleryLanding > .container {
+            width: min(1680px, 88vw);
+            margin-inline: auto;
+          }
+          .homePage.jewelleryLanding > .container > .header {
+            margin-left: clamp(100px, 7vw, 180px);
+            margin-right: 0;
+            transform: none;
+          }
+          .homePage.jewelleryLanding > .hero {
+            position: relative;
+            top: auto;
+            width: min(1220px, 84vw);
+            margin-left: auto;
+            margin-right: auto;
+            grid-template-columns: minmax(390px, .96fr) minmax(400px, 1.04fr);
+          }
+          .homePage.jewelleryLanding .desktopJewelleryStage {
+            width: 100%;
+            height: min(64vh, 645px);
+          }
+          .homePage.jewelleryLanding .imagePositionSpacer {
+            height: 26px;
+            margin-top: 16px;
+          }
+          .homePage.jewelleryLanding > .footerWrap {
+            position: relative;
+            top: auto;
+            width: min(1680px, 88vw);
+            margin: 0 auto;
+            transform: none;
+          }
+        }
+        @media (min-width: 721px) and (max-height: 900px) {
+          .homePage.jewelleryLanding .desktopJewelleryStage { height: 60vh; }
+        }
+        @media (min-width: 721px) and (max-height: 760px) {
+          .homePage.jewelleryLanding .desktopJewelleryStage { height: 56vh; }
+        }
+
 `}</style>
 
 
